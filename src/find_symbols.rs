@@ -68,4 +68,10 @@ mod tests {
         let symbols = read_fixture("fixtures/mach-o.dylib");
         assert_eq!(symbols, vec!["___test_fail", "___test_pass"]);
     }
+
+    #[test]
+    fn test_pe() {
+        let symbols = read_fixture("fixtures/pe.dll");
+        assert_eq!(symbols, vec!["___test_fail", "___test_pass"]);
+    }
 }
