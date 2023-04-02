@@ -1,0 +1,66 @@
+name: build-dlibs
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-elf:
+    name: build ELF
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: build
+        run: gcc fixtures/tests.c -shared -o elf.so
+
+      - name: upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: elf.so
+          path: elf.so
+          if-no-files-found: error
+
+  build-mach-o-binary:
+    name: build Mach-O (binary)
+    runs-on: macos-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: build
+        run: clang fixtures/tests.c -shared -o mach-o-binary.dylib
+
+      - name: upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: mach-o-binary.dylib
+          path: mach-o-binary.dylib
+          if-no-files-found: error
+
+  build-pe:
+    name: build PE
+    runs-on: windows-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: build
+        run: cl.exe /D_USRDLL /D_WINDLL fixtures/tests.c /MT /link /DLL /OUT:pe.dll
+
+      - name: show compiled files
+        run: ls -l
+        shell: bash
+
+      - name: upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: pe.dll
+          path: pe.dll
+          if-no-files-found: error
