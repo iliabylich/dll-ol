@@ -13,8 +13,12 @@ fn find_all_symbols(data: &[u8]) -> Option<Vec<String>> {
             Some(syms)
         }
         Object::PE(pe) => {
-            println!("pe: {:#?}", &pe);
-            None
+            let syms = pe
+                .exports
+                .into_iter()
+                .map(|export| export.name.unwrap_or_default().to_string())
+                .collect::<Vec<_>>();
+            Some(syms)
         }
         Object::Mach(Mach::Binary(mach)) => {
             let syms = mach
@@ -65,13 +69,13 @@ mod tests {
 
     #[test]
     fn test_mach_o() {
-        let symbols = read_fixture("fixtures/mach-o.dylib");
+        let symbols = read_fixture("fixtures/mach-o-binary.dylib");
         assert_eq!(symbols, vec!["___test_fail", "___test_pass"]);
     }
 
     #[test]
     fn test_pe() {
         let symbols = read_fixture("fixtures/pe.dll");
-        assert_eq!(symbols, vec!["___test_fail", "___test_pass"]);
+        assert_eq!(symbols, vec!["__test_fail", "__test_pass"]);
     }
 }
