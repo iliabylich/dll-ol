@@ -46,7 +46,7 @@ fn find_all_symbols(data: &[u8]) -> Option<Vec<String>> {
 
 pub fn find_test_symbols(data: &[u8]) -> Option<Vec<String>> {
     let mut symbols = find_all_symbols(data)?;
-    symbols.retain(|sym| sym.contains("__test_"));
+    symbols.retain(|sym| sym.contains("__ol_test_"));
     Some(symbols)
 }
 
@@ -64,18 +64,27 @@ mod tests {
     #[test]
     fn test_elf() {
         let symbols = read_fixture("fixtures/elf.so");
-        assert_eq!(symbols, vec!["__test_fail", "__test_pass"]);
+        assert_eq!(
+            symbols,
+            vec!["__ol_test_crash", "__ol_test_fail", "__ol_test_pass"]
+        );
     }
 
     #[test]
     fn test_mach_o() {
         let symbols = read_fixture("fixtures/mach-o-binary.dylib");
-        assert_eq!(symbols, vec!["___test_fail", "___test_pass"]);
+        assert_eq!(
+            symbols,
+            vec!["___ol_test_crash", "___ol_test_fail", "___ol_test_pass"]
+        );
     }
 
     #[test]
     fn test_pe() {
         let symbols = read_fixture("fixtures/pe.dll");
-        assert_eq!(symbols, vec!["__test_fail", "__test_pass"]);
+        assert_eq!(
+            symbols,
+            vec!["__ol_test_crash", "__ol_test_fail", "__ol_test_pass"]
+        );
     }
 }
