@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: build
-        run: clang fixtures/tests.c -shared -o mach-o-binary.dylib
+        run: clang -Wl,-undefined,dynamic_lookup fixtures/tests.c -shared -o mach-o-binary.dylib
 
       - name: upload
         uses: actions/upload-artifact@v3
@@ -51,7 +51,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: build
-        run: cl.exe /D_USRDLL /D_WINDLL fixtures/tests.c /MT /link /DLL /OUT:pe.dll
+        run: cl.exe /D_USRDLL /D_WINDLL fixtures/tests.c /MT /link /FORCE:UNRESOLVED /DLL /OUT:pe.dll
 
       - name: show compiled files
         run: ls -l
@@ -63,3 +63,31 @@ jobs:
           name: pe.dll
           path: pe.dll
           if-no-files-found: error
+
+  release:
+    name: release
+    needs: ['build-elf', 'build-mach-o-binary', 'build-pe']
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with: { name: elf.so }
+
+      - uses: actions/download-artifact@v2
+        with: { name: mach-o-binary.dylib }
+
+      - uses: actions/download-artifact@v2
+        with: { name: pe.dll }
+
+      - name: show artifacts
+        run: ls -l
+
+      - name: release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "elf.so,mach-o-binary.dylib,pe.dll"
+          token: ${{ secrets.GITHUB_TOKEN }}

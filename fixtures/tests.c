@@ -1,13 +1,16 @@
-#if defined(_MSC_VER)
-// MSVC requires special handling, as always
-#define DEFINE_TEST(name) __declspec(dllexport) void __test_##name()
-#else
-#define DEFINE_TEST(name) __attribute__((visibility("default"))) void __test_##name()
-#endif
+#include "../headers/dll-ol.h"
 
-DEFINE_TEST(pass) {}
+DEFINE_TEST(pass)
+{
+    assert_eq(1, 1);
+}
 
 DEFINE_TEST(fail)
+{
+    assert_eq(1, 2);
+}
+
+DEFINE_TEST(crash)
 {
     *(int *)0 = 0;
 }
