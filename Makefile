@@ -13,9 +13,15 @@ fixtures/pe.dll:
 	wget -q $(BASE_FIXTURE_URL)/pe.dll -O $@
 FIXTURES += fixtures/pe.dll
 
+CLEAN = $(FIXTURES)
+
 download-fixtures: $(FIXTURES)
 
+runner: runner.c
+	$(CC) $< -o $@
+CLEAN += runner
+
 clean:
-	rm -f $(FIXTURES)
+	rm -f $(CLEAN)
 
 .PHONY: clean download-fixtures
