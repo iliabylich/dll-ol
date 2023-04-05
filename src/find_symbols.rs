@@ -47,6 +47,11 @@ fn find_all_symbols(data: &[u8]) -> Option<Vec<String>> {
 pub fn find_test_symbols(data: &[u8]) -> Option<Vec<String>> {
     let mut symbols = find_all_symbols(data)?;
     symbols.retain(|sym| sym.contains("__ol_test_"));
+    for symbol in symbols.iter_mut() {
+        while symbol.starts_with("___ol_test_") {
+            *symbol = symbol.strip_prefix("_").unwrap().to_string();
+        }
+    }
     Some(symbols)
 }
 

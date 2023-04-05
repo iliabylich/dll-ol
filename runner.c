@@ -41,7 +41,7 @@ const char *tests[] = {
 
 int main(void)
 {
-    void *handle = dlopen("./mach-o.dylib", RTLD_LAZY | RTLD_GLOBAL);
+    void *handle = dlopen("./fixtures/mach-o-binary.dylib", RTLD_LAZY | RTLD_GLOBAL);
     if (handle == NULL)
     {
         printf("Failed to open dylib\n");
