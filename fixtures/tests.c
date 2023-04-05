@@ -2,9 +2,9 @@
 
 DEFINE_TEST(pass)
 {
-#define GEN_DUMMY_ASSERTION(type, var) \
-    type var = 0;                      \
-    ASSERT_EQ(var, var);
+#define GEN_DUMMY_ASSERTION(T, var_name) \
+    T var_name = 0;                      \
+    ASSERT_EQ(var_name, var_name);
 
     GEN_DUMMY_ASSERTION(char, char_);
     GEN_DUMMY_ASSERTION(signed char, signed_char_);
