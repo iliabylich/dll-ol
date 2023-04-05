@@ -1,4 +1,4 @@
-FIXTURES_RELEASE = fixtures-v0.1
+FIXTURES_RELEASE = fixtures-v0.2
 BASE_FIXTURE_URL = https://github.com/iliabylich/dll-ol/releases/download/$(FIXTURES_RELEASE)
 
 fixtures/elf.so:

@@ -12,9 +12,21 @@
 #include <stdint.h>
 
 // clang-format off
+#if defined(_MSC_VER)
+#define SIGNED_CHAR_TO_ACTION(action)
+#else
+#define SIGNED_CHAR_TO_ACTION(action) signed char: action,
+#endif
+
+#if defined(_MSC_VER)
+#define SIGNED_CHAR_TO_ITS_NAME
+#else
+#define SIGNED_CHAR_TO_ITS_NAME signed char: "signed char",
+#endif
+
 #define FOR_ANY_INTEGER(action) \
     char: action, \
-    signed char: action, \
+    SIGNED_CHAR_TO_ACTION(action) \
     unsigned char: action, \
     \
     short: action, \
@@ -37,7 +49,7 @@
 #define DLL_OL_OBJECT_TYPE(v) \
     _Generic(v, \
         char: "char", \
-        signed char: "signed char", \
+        SIGNED_CHAR_TO_ITS_NAME \
         unsigned char: "unsigned char", \
         \
         short: "short", \

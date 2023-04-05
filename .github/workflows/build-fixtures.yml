@@ -51,7 +51,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: build
-        run: cl.exe /D_USRDLL /D_WINDLL fixtures/tests.c /MT /link /FORCE:UNRESOLVED /DLL /OUT:pe.dll
+        run: cl.exe /std:c11 /D_USRDLL /D_WINDLL fixtures/tests.c /MT /link /FORCE:UNRESOLVED /DLL /OUT:pe.dll
 
       - name: show compiled files
         run: ls -l

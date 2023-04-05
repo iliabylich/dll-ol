@@ -5,3 +5,6 @@ mod dl;
 
 mod test_runner;
 pub use test_runner::TestRunner;
+
+mod assertions;
+pub use assertions::*;
