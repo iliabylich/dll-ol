@@ -48,11 +48,25 @@ impl<'a> TestRunner<'a> {
     }
 }
 
-#[test]
-fn test_new_ok() {
-    let _runner = TestRunner::new("./fixtures/mach-o-binary.dylib").unwrap();
+#[cfg(test)]
+mod tests {
+    use super::{Error, TestRunner};
 
-    let runner = TestRunner::new("./unknown.dylib");
-    assert!(runner.is_err());
-    assert_eq!(runner.unwrap_err(), Error::NoDylib);
+    #[cfg(target_os = "linux")]
+    const FIXTURE: &str = "./fixtures/elf.so";
+    #[cfg(target_os = "macos")]
+    const FIXTURE: &str = "./fixtures/mach-o-binary.dylib";
+    #[cfg(target_os = "windows")]
+    const FIXTURE: &str = "./fixtures/pe.dll";
+
+    #[test]
+    fn test_new_ok() {
+        crate::assertions::trigger_inclusion();
+
+        let _runner = TestRunner::new(FIXTURE).unwrap();
+
+        let runner = TestRunner::new("./unknown.dylib");
+        assert!(runner.is_err());
+        assert_eq!(runner.unwrap_err(), Error::NoDylib);
+    }
 }

@@ -80,7 +80,7 @@ mod tests {
         let symbols = read_fixture("fixtures/mach-o-binary.dylib");
         assert_eq!(
             symbols,
-            vec!["___ol_test_crash", "___ol_test_fail", "___ol_test_pass"]
+            vec!["__ol_test_crash", "__ol_test_fail", "__ol_test_pass"]
         );
     }
 
