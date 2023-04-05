@@ -17,9 +17,16 @@ CLEAN = $(FIXTURES)
 
 download-fixtures: $(FIXTURES)
 
+mach-o.dylib: fixtures/tests.c headers/dll-ol.h
+	$(CC) -Wl,-undefined,dynamic_lookup -shared fixtures/tests.c -o $@
+CLEAN += mach-o.dylib
+
 runner: runner.c
 	$(CC) $< -o $@
 CLEAN += runner
+
+run: runner mach-o.dylib
+	./runner
 
 clean:
 	rm -f $(CLEAN)

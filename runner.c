@@ -5,9 +5,19 @@
 
 typedef void (*test_fn)();
 
-void assert_eq(int a, int b)
+void assert_eq_signed_ints(const char *lhs_type, const char *rhs_type, int64_t lhs, int64_t rhs)
 {
-    printf("assert_eq(%d, %d)\n", a, b);
+    printf("assert_eq(%s, %lli, %s, %lli)\n", lhs_type, lhs, rhs_type, rhs);
+}
+
+void assert_eq_floats(const char *lhs_type, const char *rhs_type, double lhs, double rhs)
+{
+    printf("assert_eq(%s %lf, %s %lf)\n", lhs_type, lhs, rhs_type, rhs);
+}
+
+void dll_ol_unsupported_assert_eq(const char *lhs_type, const char *rhs_type)
+{
+    printf("unsupported comparison: %s vs %s\n", lhs_type, rhs_type);
 }
 
 int run_test(void *handle, const char *name)
@@ -31,7 +41,7 @@ const char *tests[] = {
 
 int main(void)
 {
-    void *handle = dlopen("./fixtures/mach-o-binary.dylib", RTLD_LAZY | RTLD_GLOBAL);
+    void *handle = dlopen("./mach-o.dylib", RTLD_LAZY | RTLD_GLOBAL);
     if (handle == NULL)
     {
         printf("Failed to open dylib\n");

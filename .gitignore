@@ -1,5 +1,5 @@
 /target
-fixtures/elf.so
-fixtures/mach-o-binary.dylib
-fixtures/pe.dll
+*.so
+*.dylib
+*.dll
 runner
