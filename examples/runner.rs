@@ -1,9 +1,15 @@
-use dll_ol::Runner;
+use dll_ol::{trigger_assertions_inclusion, FileGroup, TestSuite};
 
 pub fn main() {
-    let paths = std::env::args().into_iter().skip(1).collect::<Vec<_>>();
+    trigger_assertions_inclusion();
 
-    for path in paths {
-        Runner::new(&path).unwrap();
-    }
+    let paths = std::env::args().into_iter().skip(1).collect::<Vec<_>>();
+    let file_group = FileGroup::new(&paths).unwrap();
+
+    file_group.each_test(|test| {
+        println!(
+            "Running test {} (from {}, addr = {:?})",
+            test.name, test.dlib_path, test.f
+        );
+    });
 }

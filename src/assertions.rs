@@ -16,8 +16,7 @@ pub extern "C" fn assert_eq_signed_ints(
 ) {
 }
 
-#[cfg(test)]
-pub(crate) fn trigger_inclusion() -> usize {
+pub fn trigger_inclusion() -> usize {
     [
         assert_eq_floats as *mut std::ffi::c_void as usize,
         assert_eq_signed_ints as *mut std::ffi::c_void as usize,

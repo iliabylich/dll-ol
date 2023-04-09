@@ -5,17 +5,20 @@ use crate::{
 use std::collections::HashMap;
 
 mod error;
-use error::NewRunnerError;
+pub(crate) use error::FileError;
 
 #[derive(Debug)]
-pub struct Runner {
-    dlib_path: String,
-    tests: HashMap<String, TestFn>,
+pub struct File {
+    pub(crate) dlib_path: String,
+
+    pub(crate) tests: HashMap<String, TestFn>,
+
+    #[allow(dead_code)]
     dl: Loader,
 }
 
-impl Runner {
-    pub fn new(dlib_path: &str) -> Result<Self, NewRunnerError> {
+impl File {
+    pub fn new(dlib_path: &str) -> Result<Self, FileError> {
         let content = std::fs::read(dlib_path)?;
         let symbols = Parser::new(&content)
             .parse_test_symbols()
@@ -40,7 +43,7 @@ impl Runner {
 fn test_new_ok() {
     crate::assertions::trigger_inclusion();
 
-    let runner = Runner::new(crate::fixtures::FOR_CURRENT_PLATFORM).unwrap();
+    let runner = File::new(crate::fixtures::FOR_CURRENT_PLATFORM).unwrap();
     assert_eq!(runner.tests.len(), 3);
 
     let mut keys = runner.tests.keys().collect::<Vec<_>>();
@@ -55,7 +58,7 @@ fn test_new_ok() {
 fn test_new_err() {
     crate::assertions::trigger_inclusion();
 
-    let runner = Runner::new("./unknown.dylib");
+    let runner = File::new("./unknown.dylib");
     assert!(runner.is_err());
-    assert_eq!(runner.unwrap_err(), NewRunnerError::NoDylib);
+    assert_eq!(runner.unwrap_err(), FileError::NoDylib);
 }
