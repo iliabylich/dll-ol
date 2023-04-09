@@ -15,18 +15,15 @@ pub struct Runner {
 
 impl Runner {
     pub fn new(dlib_path: &str) -> Result<Self, NewRunnerError> {
-        let content = std::fs::read(dlib_path).map_err(|_err| NewRunnerError::NoDylib)?;
+        let content = std::fs::read(dlib_path)?;
         let symbols = Parser::new(&content)
             .parse_test_symbols()
             .unwrap_or_default();
-        let dl = Loader::new(dlib_path).map_err(|err| NewRunnerError::FailedToLoadDyLib(err))?;
+        let dl = Loader::new(dlib_path)?;
 
         let mut tests = vec![];
         for symbol in symbols {
-            eprintln!("Loading {:?}", symbol);
-            let f = dl
-                .get_symbol(&symbol)
-                .map_err(|err| NewRunnerError::MalformedDylib(err))?;
+            let f = dl.get_symbol(&symbol)?;
             tests.push(f);
         }
 
