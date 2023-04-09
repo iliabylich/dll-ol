@@ -1,6 +1,6 @@
 use crate::{
-    find_symbols::find_test_symbols,
     loader::{Loader, TestFn},
+    parser::Parser,
 };
 
 mod error;
@@ -15,9 +15,10 @@ pub struct Runner {
 
 impl Runner {
     pub fn new(dlib_path: &str) -> Result<Self, NewRunnerError> {
-        let symbols =
-            find_test_symbols(&std::fs::read(dlib_path).map_err(|_err| NewRunnerError::NoDylib)?)
-                .unwrap_or_default();
+        let content = std::fs::read(dlib_path).map_err(|_err| NewRunnerError::NoDylib)?;
+        let symbols = Parser::new(&content)
+            .parse_test_symbols()
+            .unwrap_or_default();
         let dl = Loader::new(dlib_path).map_err(|err| NewRunnerError::FailedToLoadDyLib(err))?;
 
         let mut tests = vec![];
@@ -41,7 +42,7 @@ impl Runner {
 fn test_new_ok() {
     crate::assertions::trigger_inclusion();
 
-    let _runner = Runner::new(crate::testing::fixture::PATH).unwrap();
+    let _runner = Runner::new(crate::testing::fixture::FOR_CURRENT_PLATFORM).unwrap();
 
     let runner = Runner::new("./unknown.dylib");
     assert!(runner.is_err());

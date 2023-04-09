@@ -1,4 +1,4 @@
-mod find_symbols;
+mod parser;
 
 mod loader;
 
