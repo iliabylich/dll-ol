@@ -8,3 +8,6 @@ pub use test_runner::TestRunner;
 
 mod assertions;
 pub use assertions::*;
+
+#[cfg(test)]
+mod testing;
