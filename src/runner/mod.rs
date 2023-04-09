@@ -39,7 +39,13 @@ impl Runner {
 fn test_new_ok() {
     crate::assertions::trigger_inclusion();
 
-    let _runner = Runner::new(crate::fixtures::FOR_CURRENT_PLATFORM).unwrap();
+    let runner = Runner::new(crate::fixtures::FOR_CURRENT_PLATFORM).unwrap();
+    assert_eq!(runner.tests.len(), 3);
+}
+
+#[test]
+fn test_new_err() {
+    crate::assertions::trigger_inclusion();
 
     let runner = Runner::new("./unknown.dylib");
     assert!(runner.is_err());
