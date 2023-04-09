@@ -2,4 +2,4 @@
 *.so
 *.dylib
 *.dll
-runner
+/runner

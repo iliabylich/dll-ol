@@ -4,14 +4,14 @@ use libc::{dlclose, dlerror, dlopen, dlsym, RTLD_GLOBAL, RTLD_LAZY};
 use std::ffi::{c_void, CStr};
 
 #[derive(Debug)]
-pub(crate) struct Dl {
+pub(crate) struct Loader {
     handle: *mut c_void,
 }
 
 pub(crate) type TestFn = extern "C" fn() -> ();
 
 #[cfg(unix)]
-impl Dl {
+impl Loader {
     pub(crate) fn new(path: &str) -> Result<Self, String> {
         let path = CString::new(path).unwrap();
         let handle = unsafe { dlopen(path.as_ptr(), RTLD_LAZY | RTLD_GLOBAL) };
@@ -35,7 +35,7 @@ impl Dl {
 }
 
 #[cfg(unix)]
-impl Drop for Dl {
+impl Drop for Loader {
     fn drop(&mut self) {
         unsafe {
             dlclose(self.handle);
