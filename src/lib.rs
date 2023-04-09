@@ -8,4 +8,4 @@ pub use runner::Runner;
 mod assertions;
 
 #[cfg(test)]
-mod testing;
+mod fixtures;

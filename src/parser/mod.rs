@@ -82,7 +82,7 @@ fn parse_fixture(path: &str) -> Vec<String> {
 
 #[test]
 fn test_elf() {
-    let symbols = parse_fixture(crate::testing::fixture::ELF_PATH);
+    let symbols = parse_fixture(crate::fixtures::ELF_PATH);
     assert_eq!(
         symbols,
         vec!["__ol_test_crash", "__ol_test_fail", "__ol_test_pass"]
@@ -91,7 +91,7 @@ fn test_elf() {
 
 #[test]
 fn test_mach_o() {
-    let symbols = parse_fixture(crate::testing::fixture::MACH_O_PATH);
+    let symbols = parse_fixture(crate::fixtures::MACH_O_PATH);
     assert_eq!(
         symbols,
         vec!["__ol_test_crash", "__ol_test_fail", "__ol_test_pass"]
@@ -100,7 +100,7 @@ fn test_mach_o() {
 
 #[test]
 fn test_pe() {
-    let symbols = parse_fixture(crate::testing::fixture::PE_PATH);
+    let symbols = parse_fixture(crate::fixtures::PE_PATH);
     assert_eq!(
         symbols,
         vec!["__ol_test_crash", "__ol_test_fail", "__ol_test_pass"]
