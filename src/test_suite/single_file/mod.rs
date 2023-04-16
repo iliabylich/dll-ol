@@ -7,8 +7,10 @@ use std::collections::HashMap;
 mod error;
 pub(crate) use error::FileError;
 
+use crate::test_suite::{Test, TestSuite};
+
 #[derive(Debug)]
-pub struct File {
+pub struct SingleFile {
     pub(crate) dlib_path: String,
 
     pub(crate) tests: HashMap<String, TestFn>,
@@ -17,7 +19,7 @@ pub struct File {
     dl: Loader,
 }
 
-impl File {
+impl SingleFile {
     pub fn new(dlib_path: &str) -> Result<Self, FileError> {
         let content = std::fs::read(dlib_path)?;
         let symbols = Parser::new(&content)
@@ -39,11 +41,26 @@ impl File {
     }
 }
 
+impl TestSuite for SingleFile {
+    fn each_test<F>(&self, f: F)
+    where
+        F: Fn(Test),
+    {
+        for (name, test) in &self.tests {
+            f(Test {
+                dlib_path: self.dlib_path.clone(),
+                name: name.clone(),
+                f: *test,
+            });
+        }
+    }
+}
+
 #[test]
 fn test_new_ok() {
     crate::assertions::trigger_inclusion();
 
-    let runner = File::new(crate::fixtures::FOR_CURRENT_PLATFORM).unwrap();
+    let runner = SingleFile::new(crate::fixtures::FOR_CURRENT_PLATFORM).unwrap();
     assert_eq!(runner.tests.len(), 3);
 
     let mut keys = runner.tests.keys().collect::<Vec<_>>();
@@ -58,7 +75,7 @@ fn test_new_ok() {
 fn test_new_err() {
     crate::assertions::trigger_inclusion();
 
-    let runner = File::new("./unknown.dylib");
+    let runner = SingleFile::new("./unknown.dylib");
     assert!(runner.is_err());
     assert_eq!(runner.unwrap_err(), FileError::NoDylib);
 }
