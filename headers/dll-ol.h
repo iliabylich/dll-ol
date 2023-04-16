@@ -9,14 +9,9 @@
     __attribute__((visibility("default"))) void __ol_test_##name()
 #endif
 
-#include "./types.h"
+#include "./assertions.gen.h"
 
 void assert_true(bool value);
-
-#define GENERATE_ASSERT_EQ(Type, Typename) void assert_eq_##Typename(Type lhs, Type rhs);
-#define GENERATE_ASSERT_NE(Type, Typename) void assert_ne_##Typename(Type lhs, Type rhs);
-
-FOREACH_TYPE(GENERATE_ASSERT_EQ);
-FOREACH_TYPE(GENERATE_ASSERT_NE);
+void assert_false(bool value);
 
 #endif // DLL_OL_H
