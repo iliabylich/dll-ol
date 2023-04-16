@@ -2,22 +2,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "./headers/types.h"
 
 typedef void (*test_fn)();
 
-void assert_eq_signed_ints(const char *lhs_type, const char *rhs_type, int64_t lhs, int64_t rhs)
-{
-    printf("assert_eq(%s, %lli, %s, %lli)\n", lhs_type, lhs, rhs_type, rhs);
-}
+#define GENERATE_ASSERTION(Type, Typename)                                             \
+    void assert_eq_##Typename(Type lhs, Type rhs)                                      \
+    {                                                                                  \
+        printf("assert_eq_" #Typename "(%llu, %llu)\n", (uint64_t)lhs, (uint64_t)rhs); \
+    }                                                                                  \
+    void assert_ne_##Typename(Type lhs, Type rhs)                                      \
+    {                                                                                  \
+        printf("assert_ne_" #Typename "(%llu, %llu)\n", (uint64_t)lhs, (uint64_t)rhs); \
+    }
+FOREACH_INTEGER(GENERATE_ASSERTION);
+#undef GENERATE_ASSERTION
 
-void assert_eq_floats(const char *lhs_type, const char *rhs_type, double lhs, double rhs)
-{
-    printf("assert_eq(%s %lf, %s %lf)\n", lhs_type, lhs, rhs_type, rhs);
-}
+#define GENERATE_ASSERTION(Type, Typename)                                                 \
+    void assert_eq_##Typename(Type lhs, Type rhs)                                          \
+    {                                                                                      \
+        printf("assert_eq_" #Typename "(%Lf, %Lf)\n", (long double)lhs, (long double)rhs); \
+    }                                                                                      \
+    void assert_ne_##Typename(Type lhs, Type rhs)                                          \
+    {                                                                                      \
+        printf("assert_ne_" #Typename "(%Lf, %Lf)\n", (long double)lhs, (long double)rhs); \
+    }
+FOREACH_FLOAT(GENERATE_ASSERTION);
+#undef GENERATE_ASSERTION
 
-void dll_ol_unsupported_assert_eq(const char *lhs_type, const char *rhs_type)
+void assert_eq_char_ptr(char *lhs, char *rhs)
 {
-    printf("unsupported comparison: %s vs %s\n", lhs_type, rhs_type);
+    printf("assert_eq_char_ptr(%s, %s)\n", lhs, rhs);
+}
+void assert_ne_char_ptr(char *lhs, char *rhs)
+{
+    printf("assert_ne_char_ptr(%s, %s)\n", lhs, rhs);
 }
 
 int run_test(void *handle, const char *name)
