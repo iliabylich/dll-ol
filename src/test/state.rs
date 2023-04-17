@@ -1,5 +1,5 @@
 #[derive(Debug, Clone, PartialEq)]
-pub enum TestState {
+pub(crate) enum TestState {
     Pending,
     Passed,
     Failed,

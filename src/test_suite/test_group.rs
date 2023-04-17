@@ -4,7 +4,7 @@ use crate::{loader::Loader, parser::Parser};
 use crate::test::{Test, TestName};
 
 #[derive(Debug)]
-pub struct TestGroup {
+pub(crate) struct TestGroup {
     pub(crate) dlib_path: String,
 
     pub(crate) tests: Vec<Test>,
@@ -14,11 +14,9 @@ pub struct TestGroup {
 }
 
 impl TestGroup {
-    pub fn new(dlib_path: String) -> Self {
+    pub(crate) fn new(dlib_path: String) -> Self {
         let content = std::fs::read(&dlib_path).unwrap();
-        let symbols = Parser::new(&content)
-            .parse_test_symbols()
-            .unwrap_or_default();
+        let symbols = Parser::new(&content).parse_test_symbols();
         let dl = Loader::new(&dlib_path);
 
         let mut tests = vec![];

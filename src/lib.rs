@@ -1,16 +1,11 @@
-mod parser;
-
-mod loader;
-
 mod assertions;
-pub use assertions::trigger_inclusion as trigger_assertions_inclusion;
+mod loader;
+mod parser;
+mod reporter;
+mod test;
+mod test_suite;
 
 #[cfg(test)]
 mod fixtures;
 
-mod test_suite;
 pub use test_suite::TestSuite;
-
-mod reporter;
-
-mod test;

@@ -1,8 +1,8 @@
 use crate::{assertions::Assertion, reporter::Reporter};
 
 pub(crate) struct AssertNe<T> {
-    pub(crate) expected: T,
-    pub(crate) actual: T,
+    expected: T,
+    actual: T,
 }
 
 impl<T> AssertNe<T> {
