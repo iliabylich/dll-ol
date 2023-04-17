@@ -29,39 +29,39 @@ class String
 end
 
 INTEGER_TYPES = [
-  SignedIntType.new('char', 'i8'),
-  UnsignedIntType.new('unsigned char', 'u8'),
-  SignedIntType.new('short', 'i8'),
-  UnsignedIntType.new('unsigned short', 'u8'),
-  SignedIntType.new('int', 'i8'),
-  UnsignedIntType.new('unsigned int', 'u8'),
-  SignedIntType.new('long', 'i8'),
-  UnsignedIntType.new('unsigned long', 'u8'),
-  SignedIntType.new('long long', 'i8'),
-  UnsignedIntType.new('unsigned long long', 'u8'),
-  SignedIntType.new('int8_t', 'u8'),
+  SignedIntType.new('char', 'c_char'),
+  UnsignedIntType.new('unsigned char', 'c_uchar'),
+  SignedIntType.new('short', 'c_short'),
+  UnsignedIntType.new('unsigned short', 'c_ushort'),
+  SignedIntType.new('int', 'c_int'),
+  UnsignedIntType.new('unsigned int', 'c_uint'),
+  SignedIntType.new('long', 'c_long'),
+  UnsignedIntType.new('unsigned long', 'c_ulong'),
+  SignedIntType.new('long long', 'c_longlong'),
+  UnsignedIntType.new('unsigned long long', 'c_ulonglong'),
+  SignedIntType.new('int8_t', 'i8'),
   UnsignedIntType.new('uint8_t', 'u8'),
-  SignedIntType.new('int16_t', 'u8'),
-  UnsignedIntType.new('uint16_t', 'u8'),
-  SignedIntType.new('int32_t', 'u8'),
-  UnsignedIntType.new('uint32_t', 'u8'),
-  SignedIntType.new('int64_t', 'u8'),
-  UnsignedIntType.new('uint64_t', 'u8'),
-  UnsignedIntType.new('bool', 'u8'),
-  UnsignedIntType.new('size_t', 'u8'),
+  SignedIntType.new('int16_t', 'u16'),
+  UnsignedIntType.new('uint16_t', 'i16'),
+  SignedIntType.new('int32_t', 'u32'),
+  UnsignedIntType.new('uint32_t', 'i32'),
+  SignedIntType.new('int64_t', 'u64'),
+  UnsignedIntType.new('uint64_t', 'i64'),
+  UnsignedIntType.new('bool', 'bool'),
+  UnsignedIntType.new('size_t', 'usize'),
 ]
 
 FLOAT_TYPES = [
-  FloatType.new('float', 'f32'),
-  FloatType.new('double', 'f32'),
-  FloatType.new('long double', 'f32'),
+  FloatType.new('float', 'c_float'),
+  FloatType.new('double', 'c_double'),
+  FloatType.new('long double', 'f64'),
 ]
 
 ALL_TYPES = [
   *INTEGER_TYPES,
   *FLOAT_TYPES,
-  Type.new('char *', '*const std::ffi::c_char', 'char *', '%s', '"hello"', '"world"'),
-  Type.new('void *', '*const std::ffi::c_void', 'void *', '%p', 'NULL', '(void *)42'),
+  Type.new('char *', '*const c_char', 'char *', '%s', '"hello"', '"world"'),
+  Type.new('void *', '*const c_void', 'void *', '%p', 'NULL', '(void *)42'),
 ]
 
 # headers/assertions.gen.h
@@ -109,6 +109,11 @@ end
 
 # src/assertions/gen.rs
 File.open('src/assertions/gen.rs', 'w') do |f|
+  f.puts 'use std::ffi::{'
+  f.puts '    c_char, c_double, c_float, c_int, c_long, c_longlong, c_short, c_uchar, c_uint, c_ulong,'
+  f.puts '    c_ulonglong, c_ushort, c_void,'
+  f.puts '};'
+  f.puts
   ALL_TYPES.each do |type|
     f.puts '#[no_mangle]'
     f.puts "pub extern \"C\" fn assert_eq_#{type.to_c_id}(_lhs: #{type.rs}, _rhs: #{type.rs}) {"
