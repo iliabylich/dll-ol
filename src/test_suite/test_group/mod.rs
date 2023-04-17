@@ -1,8 +1,5 @@
 use crate::{loader::Loader, parser::Parser};
 
-mod error;
-pub(crate) use error::FileError;
-
 use crate::test_suite::{Test, Tests};
 
 #[derive(Debug)]
@@ -16,16 +13,16 @@ pub struct TestGroup {
 }
 
 impl TestGroup {
-    pub fn new(dlib_path: &str) -> Result<Self, FileError> {
-        let content = std::fs::read(dlib_path)?;
+    pub fn new(dlib_path: &str) -> Self {
+        let content = std::fs::read(dlib_path).unwrap();
         let symbols = Parser::new(&content)
             .parse_test_symbols()
             .unwrap_or_default();
-        let dl = Loader::new(dlib_path)?;
+        let dl = Loader::new(dlib_path).unwrap();
 
         let mut tests = vec![];
         for symbol in symbols {
-            let f = dl.get_symbol(&symbol)?;
+            let f = dl.get_symbol(&symbol).unwrap();
             tests.push(Test {
                 dlib_path: dlib_path.to_string(),
                 name: symbol.clone(),
@@ -33,11 +30,11 @@ impl TestGroup {
             });
         }
 
-        Ok(Self {
+        Self {
             dlib_path: dlib_path.to_string(),
             tests,
             dl,
-        })
+        }
     }
 }
 
@@ -51,7 +48,7 @@ impl Tests for TestGroup {
 fn test_new_ok() {
     crate::assertions::trigger_inclusion();
 
-    let runner = TestGroup::new(crate::fixtures::FOR_CURRENT_PLATFORM).unwrap();
+    let runner = TestGroup::new(crate::fixtures::FOR_CURRENT_PLATFORM);
     assert_eq!(runner.tests.len(), 3);
 
     let mut test_names = runner
@@ -64,13 +61,4 @@ fn test_new_ok() {
         test_names,
         vec!["__ol_test_crash", "__ol_test_fail", "__ol_test_pass"]
     );
-}
-
-#[test]
-fn test_new_err() {
-    crate::assertions::trigger_inclusion();
-
-    let runner = TestGroup::new("./unknown.dylib");
-    assert!(runner.is_err());
-    assert_eq!(runner.unwrap_err(), FileError::NoDylib);
 }

@@ -4,7 +4,7 @@ pub fn main() {
     trigger_assertions_inclusion();
 
     let paths = std::env::args().into_iter().skip(1).collect::<Vec<_>>();
-    let file_group = TestSuite::new(&paths).unwrap();
+    let file_group = TestSuite::new(&paths);
 
     for test in file_group.tests() {
         let name = test.name.clone();
