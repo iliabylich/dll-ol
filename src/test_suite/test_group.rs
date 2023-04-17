@@ -14,18 +14,18 @@ pub struct TestGroup {
 }
 
 impl TestGroup {
-    pub fn new(dlib_path: &str) -> Self {
-        let content = std::fs::read(dlib_path).unwrap();
+    pub fn new(dlib_path: String) -> Self {
+        let content = std::fs::read(&dlib_path).unwrap();
         let symbols = Parser::new(&content)
             .parse_test_symbols()
             .unwrap_or_default();
-        let dl = Loader::new(dlib_path);
+        let dl = Loader::new(&dlib_path);
 
         let mut tests = vec![];
         for symbol in symbols {
             let f = dl.get_symbol(&symbol);
             tests.push(Test {
-                dlib_path: dlib_path.to_string(),
+                dlib_path: dlib_path.clone(),
                 name: TestName::new(&symbol),
                 f,
                 ..Default::default()
@@ -33,7 +33,7 @@ impl TestGroup {
         }
 
         Self {
-            dlib_path: dlib_path.to_string(),
+            dlib_path,
             tests,
             dl,
         }
@@ -52,7 +52,7 @@ impl TestGroup {
 fn test_new_ok() {
     crate::assertions::trigger_inclusion();
 
-    let runner = TestGroup::new(crate::fixtures::FOR_CURRENT_PLATFORM);
+    let runner = TestGroup::new(crate::fixtures::FOR_CURRENT_PLATFORM.to_string());
     assert_eq!(runner.tests.len(), 3);
 
     let mut test_names = runner
