@@ -10,3 +10,5 @@ mod fixtures;
 
 mod test_suite;
 pub use test_suite::{MultiFile, TestSuite};
+
+mod reporter;

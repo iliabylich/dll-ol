@@ -1,3 +1,5 @@
+use crate::reporter::Reporter;
+
 mod gen;
 use gen::trigger_inclusion as gen_trigger_inclusion;
 
@@ -19,3 +21,18 @@ pub fn trigger_inclusion() -> usize {
     .fold(0, |acc: usize, e| acc.wrapping_add(e))
         + gen_trigger_inclusion()
 }
+
+pub(crate) trait Assertion {
+    fn run_with_reporter(&self, reporter: &mut Reporter);
+
+    fn run(&self) {
+        let mut reporter = Reporter::instance();
+        self.run_with_reporter(&mut reporter);
+    }
+}
+
+mod assert_eq;
+pub(crate) use assert_eq::AssertEq;
+
+mod assert_ne;
+pub(crate) use assert_ne::AssertNe;

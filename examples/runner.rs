@@ -7,9 +7,15 @@ pub fn main() {
     let file_group = MultiFile::new(&paths).unwrap();
 
     file_group.each_test(|test| {
+        let name = test.name.clone();
+
         println!(
-            "Running test {} (from {}, addr = {:?})",
+            "---- Running test {} (from {}, addr = {:?})",
             test.name, test.dlib_path, test.f
         );
+
+        (test.f)();
+
+        println!("---- Test {} finished", name);
     });
 }
