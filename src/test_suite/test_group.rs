@@ -1,3 +1,7 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use crate::context::Context;
 use crate::reporter::Reporter;
 use crate::{loader::Loader, parser::Parser};
 
@@ -9,31 +13,37 @@ pub(crate) struct TestGroup {
 
     pub(crate) tests: Vec<Test>,
 
+    ctx: Option<Rc<RefCell<Context>>>,
+
     #[allow(dead_code)]
     dl: Loader,
 }
 
-impl TestGroup {
-    pub(crate) fn new(dlib_path: String) -> Self {
+impl From<String> for TestGroup {
+    fn from(dlib_path: String) -> Self {
         let content = std::fs::read(&dlib_path).unwrap();
         let symbols = Parser::new(&content).parse_test_symbols();
-        let dl = Loader::new(&dlib_path);
+        let loader = Loader::new(&dlib_path);
 
         let mut tests = vec![];
         for symbol in symbols {
-            let f = dl.get_symbol(&symbol);
-            tests.push(Test {
-                dlib_path: dlib_path.clone(),
-                name: TestName::new(&symbol),
-                f,
-                ..Default::default()
-            });
+            tests.push(Test::new(&loader, symbol));
         }
 
         Self {
             dlib_path,
             tests,
-            dl,
+            dl: loader,
+            ctx: None,
+        }
+    }
+}
+
+impl TestGroup {
+    pub(crate) fn set_ctx(&mut self, ctx: Rc<RefCell<Context>>) {
+        self.ctx = Some(ctx.clone());
+        for test in &mut self.tests {
+            test.set_ctx(ctx.clone());
         }
     }
 
@@ -50,7 +60,7 @@ impl TestGroup {
 fn test_new_ok() {
     crate::assertions::trigger_inclusion();
 
-    let runner = TestGroup::new(crate::fixtures::FOR_CURRENT_PLATFORM.to_string());
+    let runner = TestGroup::from(crate::fixtures::FOR_CURRENT_PLATFORM.to_string());
     assert_eq!(runner.tests.len(), 3);
 
     let mut test_names = runner

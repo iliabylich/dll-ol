@@ -12,6 +12,7 @@ macro_rules! panic_with_dlerror {
 
 #[derive(Debug)]
 pub(crate) struct Loader {
+    pub(crate) path: String,
     handle: *mut c_void,
 }
 
@@ -20,12 +21,15 @@ pub(crate) type TestFn = extern "C" fn() -> ();
 #[cfg(unix)]
 impl Loader {
     pub(crate) fn new(path: &str) -> Self {
-        let path = CString::new(path).unwrap();
-        let handle = unsafe { dlopen(path.as_ptr(), RTLD_LAZY | RTLD_GLOBAL) };
+        let c_path = CString::new(path).unwrap();
+        let handle = unsafe { dlopen(c_path.as_ptr(), RTLD_LAZY | RTLD_GLOBAL) };
         if handle.is_null() {
             panic_with_dlerror!();
         }
-        Self { handle }
+        Self {
+            handle,
+            path: path.to_string(),
+        }
     }
 
     pub(crate) fn get_symbol(&self, symbol: &str) -> TestFn {

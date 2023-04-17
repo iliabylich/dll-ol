@@ -1,5 +1,8 @@
-use crate::test::{Test, TestName, CURRENT as CURRENT_TEST};
-use std::cell::RefCell;
+use crate::{
+    context::Context,
+    test::{Test, TestName, CURRENT as CURRENT_TEST},
+};
+use std::{cell::RefCell, rc::Rc};
 
 struct Failure {
     dlib_path: String,
@@ -9,6 +12,8 @@ struct Failure {
 
 #[derive(Default)]
 pub(crate) struct Reporter {
+    ctx: Option<Rc<RefCell<Context>>>,
+
     failures: Vec<Failure>,
 }
 
@@ -21,6 +26,10 @@ const RED: &str = "\x1b[0;31m";
 const RESET_COLOR: &str = "\x1b[0m";
 
 impl Reporter {
+    pub(crate) fn set_ctx(&mut self, ctx: Rc<RefCell<Context>>) {
+        self.ctx = Some(ctx);
+    }
+
     pub(crate) fn suite_started() {
         eprintln!("\nStarting...");
     }

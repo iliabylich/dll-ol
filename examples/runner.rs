@@ -1,5 +1,5 @@
-use dll_ol::TestSuite;
+use dll_ol::run_from_env;
 
 pub fn main() {
-    TestSuite::from_env().run();
+    run_from_env()
 }

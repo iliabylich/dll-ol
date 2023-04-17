@@ -1,4 +1,5 @@
 mod assertions;
+mod context;
 mod loader;
 mod parser;
 mod reporter;
@@ -8,4 +9,4 @@ mod test_suite;
 #[cfg(test)]
 mod fixtures;
 
-pub use test_suite::TestSuite;
+pub use context::{run, run_from_env};

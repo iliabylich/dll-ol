@@ -10,7 +10,7 @@ pub extern "C" fn assert_false(_value: bool) {
     todo!()
 }
 
-pub fn trigger_inclusion() -> usize {
+pub(crate) fn trigger_inclusion() -> usize {
     [
         assert_true as *mut std::ffi::c_void as usize,
         assert_false as *mut std::ffi::c_void as usize,
