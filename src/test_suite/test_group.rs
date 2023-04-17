@@ -18,11 +18,11 @@ impl TestGroup {
         let symbols = Parser::new(&content)
             .parse_test_symbols()
             .unwrap_or_default();
-        let dl = Loader::new(dlib_path).unwrap();
+        let dl = Loader::new(dlib_path);
 
         let mut tests = vec![];
         for symbol in symbols {
-            let f = dl.get_symbol(&symbol).unwrap();
+            let f = dl.get_symbol(&symbol);
             tests.push(Test {
                 dlib_path: dlib_path.to_string(),
                 name: symbol.clone(),

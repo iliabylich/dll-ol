@@ -3,8 +3,12 @@ use std::ffi::CString;
 use libc::{dlclose, dlopen, dlsym, RTLD_GLOBAL, RTLD_LAZY};
 use std::ffi::c_void;
 
-mod error;
-pub(crate) use error::{DlopenError, DlsymError};
+macro_rules! panic_with_dlerror {
+    () => {
+        let error = unsafe { std::ffi::CStr::from_ptr(libc::dlerror()) };
+        panic!("{}", error.to_string_lossy());
+    };
+}
 
 #[derive(Debug)]
 pub(crate) struct Loader {
@@ -15,23 +19,23 @@ pub(crate) type TestFn = extern "C" fn() -> ();
 
 #[cfg(unix)]
 impl Loader {
-    pub(crate) fn new(path: &str) -> Result<Self, DlopenError> {
+    pub(crate) fn new(path: &str) -> Self {
         let path = CString::new(path).unwrap();
         let handle = unsafe { dlopen(path.as_ptr(), RTLD_LAZY | RTLD_GLOBAL) };
         if handle.is_null() {
-            return Err(DlopenError::new());
+            panic_with_dlerror!();
         }
-        Ok(Self { handle })
+        Self { handle }
     }
 
-    pub(crate) fn get_symbol(&self, symbol: &str) -> Result<TestFn, DlsymError> {
+    pub(crate) fn get_symbol(&self, symbol: &str) -> TestFn {
         let symbol = CString::new(symbol).unwrap();
         let ptr = unsafe { dlsym(self.handle, symbol.as_ptr() as *const i8) };
         if ptr.is_null() {
-            return Err(DlsymError::new());
+            panic_with_dlerror!();
         }
         let f: TestFn = unsafe { std::mem::transmute(ptr) };
-        Ok(f)
+        f
     }
 }
 
