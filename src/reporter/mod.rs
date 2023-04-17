@@ -1,9 +1,9 @@
-use crate::test_suite::{Test, CURRENT_TEST};
+use crate::test::{Test, TestName, CURRENT as CURRENT_TEST};
 use std::cell::RefCell;
 
 struct Failure {
     dlib_path: String,
-    test_name: String,
+    test_name: TestName,
     message: String,
 }
 
@@ -40,7 +40,11 @@ impl Reporter {
             } else {
                 eprintln!("{} tests failed:\n", failures.len());
                 for failure in failures {
-                    eprintln!("  {} (in {})", failure.test_name, failure.dlib_path);
+                    eprintln!(
+                        "  {} (in {})",
+                        failure.test_name.pretty(),
+                        failure.dlib_path
+                    );
                     eprintln!("    {}\n", failure.message);
                 }
             }
@@ -54,13 +58,13 @@ impl Reporter {
     pub(crate) fn report_test_group_finished() {}
 
     pub(crate) fn report_test_started(test: &Test) {
-        eprint!("test {} ... ", test.display_name());
+        eprint!("test {} ... ", test.name.pretty());
     }
 
     pub(crate) fn report_test_success() {
         CURRENT_TEST.with(|current_test| {
             if let Some(test) = current_test.borrow_mut().as_mut() {
-                if test.set_passed() {
+                if test.state.set_passed() {
                     eprintln!("{}ok{}", GREEN, RESET_COLOR);
                 }
             }
@@ -69,14 +73,14 @@ impl Reporter {
 
     pub(crate) fn report_test_failure(message: String) {
         let mut dlib_path = String::new();
-        let mut test_name = String::new();
+        let mut test_name = TestName::default();
 
         CURRENT_TEST.with(|current_test| {
             if let Some(test) = current_test.borrow_mut().as_mut() {
                 dlib_path = test.dlib_path.clone();
                 test_name = test.name.clone();
 
-                if test.set_failed() {
+                if test.state.set_failed() {
                     eprintln!("{}FAILED{}", RED, RESET_COLOR);
                 }
             }

@@ -9,6 +9,8 @@ pub use assertions::trigger_inclusion as trigger_assertions_inclusion;
 mod fixtures;
 
 mod test_suite;
-pub use test_suite::{TestSuite, Tests};
+pub use test_suite::TestSuite;
 
 mod reporter;
+
+mod test;

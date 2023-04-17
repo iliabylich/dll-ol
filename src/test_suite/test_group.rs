@@ -1,8 +1,7 @@
 use crate::reporter::Reporter;
-use crate::test_suite::test::TestState;
 use crate::{loader::Loader, parser::Parser};
 
-use crate::test_suite::{Test, Tests};
+use crate::test::{Test, TestName};
 
 #[derive(Debug)]
 pub struct TestGroup {
@@ -27,9 +26,9 @@ impl TestGroup {
             let f = dl.get_symbol(&symbol);
             tests.push(Test {
                 dlib_path: dlib_path.to_string(),
-                name: symbol.clone(),
+                name: TestName::new(&symbol),
                 f,
-                state: TestState::Pending,
+                ..Default::default()
             });
         }
 
@@ -49,12 +48,6 @@ impl TestGroup {
     }
 }
 
-impl Tests for TestGroup {
-    fn tests(&self) -> Vec<Test> {
-        self.tests.clone()
-    }
-}
-
 #[test]
 fn test_new_ok() {
     crate::assertions::trigger_inclusion();
@@ -65,7 +58,7 @@ fn test_new_ok() {
     let mut test_names = runner
         .tests
         .iter()
-        .map(|test| test.name.to_string())
+        .map(|test| test.name.raw())
         .collect::<Vec<_>>();
     test_names.sort_unstable();
     assert_eq!(
