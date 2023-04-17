@@ -1,5 +1,3 @@
-use std::{cell::RefCell, rc::Rc};
-
 use crate::{
     reporter::Reporter,
     test::Test,
@@ -9,37 +7,59 @@ use crate::{
 pub(crate) struct Context {
     test_suite: TestSuite,
 
-    current_test_group: Option<Rc<RefCell<TestGroup>>>,
-    current_test: Option<Rc<RefCell<Test>>>,
+    current_test_group: Option<&'static mut TestGroup>,
+    current_test: Option<&'static mut Test>,
 
     reporter: Reporter,
 }
 
-impl std::fmt::Debug for Context {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Context").finish()
+static mut CONTEXT_REF: *mut Context = std::ptr::null_mut();
+
+impl Context {
+    fn current() -> &'static mut Context {
+        // SAFETY: this object never leaves `run` function (and it's boxed), so it's safe to
+        // transmute it to a static reference.
+        unsafe { CONTEXT_REF.as_mut().unwrap() }
+    }
+
+    pub(crate) fn current_test_group() -> Option<&'static mut TestGroup> {
+        Self::current().current_test_group.as_deref_mut()
+    }
+
+    pub(crate) fn set_current_test_group(test_group: &'static mut TestGroup) {
+        Self::current().current_test_group = Some(test_group)
+    }
+
+    pub(crate) fn current_test() -> Option<&'static mut Test> {
+        Self::current().current_test.as_deref_mut()
+    }
+
+    pub(crate) fn set_current_test(test: &'static mut Test) {
+        Self::current().current_test = Some(test)
+    }
+
+    pub(crate) fn reporter() -> &'static mut Reporter {
+        &mut Self::current().reporter
     }
 }
 
 pub fn run(paths: Vec<String>) {
     crate::assertions::trigger_inclusion();
 
-    let ctx = Rc::new(RefCell::new(Context {
+    let ctx = Box::new(Context {
         test_suite: TestSuite::from(paths),
         current_test_group: None,
         current_test: None,
         reporter: Reporter::default(),
-    }));
+    });
 
-    {
-        let mut ctx_mut = ctx.borrow_mut();
-        ctx_mut.test_suite.set_ctx(ctx.clone());
-        ctx_mut.reporter.set_ctx(ctx.clone());
-    }
+    // Populate global context.
+    unsafe { CONTEXT_REF = Box::into_raw(ctx) }
 
-    {
-        ctx.borrow().test_suite.run();
-    }
+    Context::current().test_suite.run();
+
+    // Free the context.
+    unsafe { Box::from_raw(CONTEXT_REF) };
 }
 
 pub fn run_from_env() {

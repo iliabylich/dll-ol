@@ -1,5 +1,5 @@
-use crate::{context::Context, loader::Loader, reporter::Reporter};
-use std::{cell::RefCell, rc::Rc};
+use crate::{context::Context, loader::Loader};
+use std::cell::RefCell;
 
 mod state;
 use state::TestState;
@@ -7,29 +7,12 @@ use state::TestState;
 mod name;
 pub(crate) use name::TestName;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub(crate) struct Test {
-    ctx: Option<Rc<RefCell<Context>>>,
-
     pub(crate) dlib_path: String,
     pub(crate) name: TestName,
     pub(crate) f: extern "C" fn() -> (),
     pub(crate) state: TestState,
-}
-
-extern "C" fn dummy_fn() {}
-
-impl Default for Test {
-    fn default() -> Self {
-        Self {
-            ctx: None,
-
-            dlib_path: String::new(),
-            name: TestName::default(),
-            f: dummy_fn,
-            state: TestState::default(),
-        }
-    }
 }
 
 thread_local! {
@@ -43,29 +26,44 @@ impl Test {
             dlib_path: loader.path.to_string(),
             name: TestName::new(&name),
             f,
-            ctx: None,
             state: TestState::Pending,
         }
     }
 
-    pub(crate) fn set_ctx(&mut self, ctx: Rc<RefCell<Context>>) {
-        self.ctx = Some(ctx);
-    }
-
-    pub(crate) fn set_current(&self) {
-        CURRENT.with(|current| {
-            *current.borrow_mut() = Some(self.clone());
-        });
-    }
-
-    pub(crate) fn run(&self) {
+    pub(crate) fn run(self: &mut Box<Self>) {
         if !self.name.safe_to_run() {
             return;
         }
 
-        self.set_current();
-        Reporter::test_started(&self);
+        self.started();
         (self.f)();
-        Reporter::test_passed();
+        self.passed();
+    }
+
+    fn started(self: &mut Box<Self>) {
+        let test = self.as_mut() as *mut Self;
+        // SAFETY: the Test is boxed and it's never moved.
+        Context::set_current_test(unsafe { test.as_mut().unwrap() });
+
+        Context::reporter().test_started();
+    }
+
+    fn passed(&mut self) {
+        if self.state != TestState::Pending {
+            return;
+        }
+
+        self.state = TestState::Passed;
+        Context::reporter().test_passed();
+    }
+
+    // Called by assertions in case of a failure
+    pub(crate) fn failed(&mut self, message: String) {
+        if self.state != TestState::Pending {
+            return;
+        }
+
+        self.state = TestState::Failed;
+        Context::reporter().test_failed(message);
     }
 }

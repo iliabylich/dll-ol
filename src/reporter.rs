@@ -1,8 +1,8 @@
 use crate::{
     context::Context,
-    test::{Test, TestName, CURRENT as CURRENT_TEST},
+    test::{TestName, CURRENT as CURRENT_TEST},
 };
-use std::{cell::RefCell, rc::Rc};
+use std::cell::RefCell;
 
 struct Failure {
     dlib_path: String,
@@ -12,8 +12,6 @@ struct Failure {
 
 #[derive(Default)]
 pub(crate) struct Reporter {
-    ctx: Option<Rc<RefCell<Context>>>,
-
     failures: Vec<Failure>,
 }
 
@@ -26,15 +24,11 @@ const RED: &str = "\x1b[0;31m";
 const RESET_COLOR: &str = "\x1b[0m";
 
 impl Reporter {
-    pub(crate) fn set_ctx(&mut self, ctx: Rc<RefCell<Context>>) {
-        self.ctx = Some(ctx);
-    }
-
-    pub(crate) fn suite_started() {
+    pub(crate) fn suite_started(&mut self) {
         eprintln!("\nStarting...");
     }
 
-    pub(crate) fn suite_finished() {
+    pub(crate) fn suite_finished(&mut self) {
         eprintln!("\nFinished.\n");
 
         INSTANCE.with(|reporter| {
@@ -57,17 +51,25 @@ impl Reporter {
         })
     }
 
-    pub(crate) fn test_group_started(test_group: &str, tests_count: usize) {
-        eprintln!("\nRunning {} tests from {}", tests_count, test_group);
+    pub(crate) fn test_group_started(&mut self) {
+        let test_group = Context::current_test_group().unwrap();
+
+        eprintln!(
+            "\nRunning {} tests from {}",
+            test_group.tests_count(),
+            test_group.name()
+        );
     }
 
-    pub(crate) fn test_group_finished() {}
+    pub(crate) fn test_group_finished(&mut self) {}
 
-    pub(crate) fn test_started(test: &Test) {
+    pub(crate) fn test_started(&mut self) {
+        let test = Context::current_test().unwrap();
+
         eprint!("test {} ... ", test.name.pretty());
     }
 
-    pub(crate) fn test_passed() {
+    pub(crate) fn test_passed(&mut self) {
         CURRENT_TEST.with(|current_test| {
             if let Some(test) = current_test.borrow_mut().as_mut() {
                 if test.state.set_passed() {
@@ -77,7 +79,7 @@ impl Reporter {
         });
     }
 
-    pub(crate) fn test_failed(message: String) {
+    pub(crate) fn test_failed(&mut self, message: String) {
         let mut dlib_path = String::new();
         let mut test_name = TestName::default();
 

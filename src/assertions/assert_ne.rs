@@ -1,4 +1,4 @@
-use crate::{assertions::Assertion, reporter::Reporter};
+use crate::{assertions::Assertion, context::Context};
 
 pub(crate) struct AssertNe<T> {
     expected: T,
@@ -14,7 +14,7 @@ impl<T> AssertNe<T> {
 impl<T: PartialEq + std::fmt::Debug> Assertion for AssertNe<T> {
     fn run(&self) {
         if self.expected == self.actual {
-            Reporter::test_failed(format!(
+            Context::current_test().unwrap().failed(format!(
                 "Expected {:?} but got {:?}",
                 self.expected, self.actual
             ))

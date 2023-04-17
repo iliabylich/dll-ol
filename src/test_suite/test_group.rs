@@ -1,19 +1,13 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use crate::context::Context;
-use crate::reporter::Reporter;
 use crate::{loader::Loader, parser::Parser};
 
-use crate::test::{Test, TestName};
+use crate::test::Test;
 
 #[derive(Debug)]
 pub(crate) struct TestGroup {
-    pub(crate) dlib_path: String,
+    dlib_path: String,
 
-    pub(crate) tests: Vec<Test>,
-
-    ctx: Option<Rc<RefCell<Context>>>,
+    tests: Vec<Box<Test>>,
 
     #[allow(dead_code)]
     dl: Loader,
@@ -27,32 +21,44 @@ impl From<String> for TestGroup {
 
         let mut tests = vec![];
         for symbol in symbols {
-            tests.push(Test::new(&loader, symbol));
+            tests.push(Box::new(Test::new(&loader, symbol)));
         }
 
         Self {
             dlib_path,
             tests,
             dl: loader,
-            ctx: None,
         }
     }
 }
 
 impl TestGroup {
-    pub(crate) fn set_ctx(&mut self, ctx: Rc<RefCell<Context>>) {
-        self.ctx = Some(ctx.clone());
+    pub(crate) fn run(self: &mut Box<Self>) {
+        self.started();
         for test in &mut self.tests {
-            test.set_ctx(ctx.clone());
-        }
-    }
-
-    pub(crate) fn run(&self) {
-        Reporter::test_group_started(&self.dlib_path, self.tests.len());
-        for test in &self.tests {
             test.run();
         }
-        Reporter::test_group_finished();
+        self.finished();
+    }
+
+    pub(crate) fn tests_count(&self) -> usize {
+        self.tests.len()
+    }
+
+    pub(crate) fn name(&self) -> &str {
+        &self.dlib_path
+    }
+
+    fn started(self: &mut Box<Self>) {
+        let test_group = self.as_mut() as *mut Self;
+        // SAFETY: the Test is boxed and it's never moved.
+        Context::set_current_test_group(unsafe { test_group.as_mut().unwrap() });
+
+        Context::reporter().test_group_started()
+    }
+
+    fn finished(&self) {
+        Context::reporter().test_group_finished()
     }
 }
 
