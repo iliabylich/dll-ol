@@ -21,10 +21,10 @@ impl TestSuite {
     }
 
     pub fn run(&self) {
-        Reporter::report_suite_started();
+        Reporter::suite_started();
         for group in &self.groups {
             group.run();
         }
-        Reporter::report_suite_finished();
+        Reporter::suite_finished();
     }
 }

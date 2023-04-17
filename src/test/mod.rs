@@ -45,8 +45,8 @@ impl Test {
         }
 
         self.set_current();
-        Reporter::report_test_started(&self);
+        Reporter::test_started(&self);
         (self.f)();
-        Reporter::report_test_success();
+        Reporter::test_passed();
     }
 }

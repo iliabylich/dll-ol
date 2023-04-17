@@ -7,12 +7,13 @@ struct Failure {
     message: String,
 }
 
+#[derive(Default)]
 pub(crate) struct Reporter {
     failures: Vec<Failure>,
 }
 
 thread_local! {
-    pub(crate) static INSTANCE: RefCell<Reporter> = RefCell::new(Reporter::new());
+    pub(crate) static INSTANCE: RefCell<Reporter> = RefCell::new(Reporter::default());
 }
 
 const GREEN: &str = "\x1b[1;32m";
@@ -20,15 +21,11 @@ const RED: &str = "\x1b[0;31m";
 const RESET_COLOR: &str = "\x1b[0m";
 
 impl Reporter {
-    pub(crate) fn new() -> Self {
-        Self { failures: vec![] }
-    }
-
-    pub(crate) fn report_suite_started() {
+    pub(crate) fn suite_started() {
         eprintln!("\nStarting...");
     }
 
-    pub(crate) fn report_suite_finished() {
+    pub(crate) fn suite_finished() {
         eprintln!("\nFinished.\n");
 
         INSTANCE.with(|reporter| {
@@ -51,17 +48,17 @@ impl Reporter {
         })
     }
 
-    pub(crate) fn report_test_group_started(test_group: &str, tests_count: usize) {
+    pub(crate) fn test_group_started(test_group: &str, tests_count: usize) {
         eprintln!("\nRunning {} tests from {}", tests_count, test_group);
     }
 
-    pub(crate) fn report_test_group_finished() {}
+    pub(crate) fn test_group_finished() {}
 
-    pub(crate) fn report_test_started(test: &Test) {
+    pub(crate) fn test_started(test: &Test) {
         eprint!("test {} ... ", test.name.pretty());
     }
 
-    pub(crate) fn report_test_success() {
+    pub(crate) fn test_passed() {
         CURRENT_TEST.with(|current_test| {
             if let Some(test) = current_test.borrow_mut().as_mut() {
                 if test.state.set_passed() {
@@ -71,7 +68,7 @@ impl Reporter {
         });
     }
 
-    pub(crate) fn report_test_failure(message: String) {
+    pub(crate) fn test_failed(message: String) {
         let mut dlib_path = String::new();
         let mut test_name = TestName::default();
 

@@ -38,11 +38,11 @@ impl TestGroup {
     }
 
     pub(crate) fn run(&self) {
-        Reporter::report_test_group_started(&self.dlib_path, self.tests.len());
+        Reporter::test_group_started(&self.dlib_path, self.tests.len());
         for test in &self.tests {
             test.run();
         }
-        Reporter::report_test_group_finished();
+        Reporter::test_group_finished();
     }
 }
 
