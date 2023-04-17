@@ -1,8 +1,4 @@
-use crate::{
-    context::Context,
-    test::{TestName, CURRENT as CURRENT_TEST},
-};
-use std::cell::RefCell;
+use crate::{context::Context, test::TestName};
 
 struct Failure {
     dlib_path: String,
@@ -13,10 +9,6 @@ struct Failure {
 #[derive(Default)]
 pub(crate) struct Reporter {
     failures: Vec<Failure>,
-}
-
-thread_local! {
-    pub(crate) static INSTANCE: RefCell<Reporter> = RefCell::new(Reporter::default());
 }
 
 const GREEN: &str = "\x1b[1;32m";
@@ -31,24 +23,19 @@ impl Reporter {
     pub(crate) fn suite_finished(&mut self) {
         eprintln!("\nFinished.\n");
 
-        INSTANCE.with(|reporter| {
-            let reporter = reporter.borrow();
-            let failures = reporter.failures.as_slice();
-
-            if failures.is_empty() {
-                eprintln!("All tests passed");
-            } else {
-                eprintln!("{} tests failed:\n", failures.len());
-                for failure in failures {
-                    eprintln!(
-                        "  {} (in {})",
-                        failure.test_name.pretty(),
-                        failure.dlib_path
-                    );
-                    eprintln!("    {}\n", failure.message);
-                }
+        if self.failures.is_empty() {
+            eprintln!("All tests passed");
+        } else {
+            eprintln!("{} tests failed:\n", self.failures.len());
+            for failure in &mut self.failures {
+                eprintln!(
+                    "  {} (in {})",
+                    failure.test_name.pretty(),
+                    failure.dlib_path
+                );
+                eprintln!("    {}\n", failure.message);
             }
-        })
+        }
     }
 
     pub(crate) fn test_group_started(&mut self) {
@@ -70,37 +57,18 @@ impl Reporter {
     }
 
     pub(crate) fn test_passed(&mut self) {
-        CURRENT_TEST.with(|current_test| {
-            if let Some(test) = current_test.borrow_mut().as_mut() {
-                if test.state.set_passed() {
-                    eprintln!("{}ok{}", GREEN, RESET_COLOR);
-                }
-            }
-        });
+        let _test = Context::current_test().unwrap();
+        eprintln!("{}ok{}", GREEN, RESET_COLOR);
     }
 
     pub(crate) fn test_failed(&mut self, message: String) {
-        let mut dlib_path = String::new();
-        let mut test_name = TestName::default();
+        let test = Context::current_test().unwrap();
+        eprintln!("{}FAILED{}", RED, RESET_COLOR);
 
-        CURRENT_TEST.with(|current_test| {
-            if let Some(test) = current_test.borrow_mut().as_mut() {
-                dlib_path = test.dlib_path.clone();
-                test_name = test.name.clone();
-
-                if test.state.set_failed() {
-                    eprintln!("{}FAILED{}", RED, RESET_COLOR);
-                }
-            }
-        });
-
-        INSTANCE.with(|reporter| {
-            let failure = Failure {
-                dlib_path,
-                test_name,
-                message,
-            };
-            reporter.borrow_mut().failures.push(failure)
+        self.failures.push(Failure {
+            dlib_path: test.dlib_path.clone(),
+            test_name: test.name.clone(),
+            message,
         })
     }
 }

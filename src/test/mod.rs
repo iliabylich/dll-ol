@@ -1,5 +1,4 @@
 use crate::{context::Context, loader::Loader};
-use std::cell::RefCell;
 
 mod state;
 use state::TestState;
@@ -13,10 +12,6 @@ pub(crate) struct Test {
     pub(crate) name: TestName,
     pub(crate) f: extern "C" fn() -> (),
     pub(crate) state: TestState,
-}
-
-thread_local! {
-    pub(crate) static CURRENT: RefCell<Option<Test>> = RefCell::new(None);
 }
 
 impl Test {
@@ -49,21 +44,15 @@ impl Test {
     }
 
     fn passed(&mut self) {
-        if self.state != TestState::Pending {
-            return;
+        if self.state.set_passed() {
+            Context::reporter().test_passed();
         }
-
-        self.state = TestState::Passed;
-        Context::reporter().test_passed();
     }
 
     // Called by assertions in case of a failure
     pub(crate) fn failed(&mut self, message: String) {
-        if self.state != TestState::Pending {
-            return;
+        if self.state.set_failed() {
+            Context::reporter().test_failed(message);
         }
-
-        self.state = TestState::Failed;
-        Context::reporter().test_failed(message);
     }
 }
