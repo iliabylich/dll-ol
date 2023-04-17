@@ -63,6 +63,6 @@ pub fn run(paths: Vec<String>) {
 }
 
 pub fn run_from_env() {
-    let paths = std::env::args().into_iter().skip(1).collect::<Vec<_>>();
+    let paths = std::env::args().skip(1).collect::<Vec<_>>();
     run(paths)
 }

@@ -15,7 +15,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_all(&self) -> Vec<String> {
-        match Object::parse(&self.data).unwrap() {
+        match Object::parse(self.data).unwrap() {
             Object::Elf(elf) => Self::parse_elf(elf),
             Object::PE(pe) => Self::parse_pe(pe),
             Object::Mach(Mach::Binary(mach)) => Self::parse_mach_o_binary(mach),
@@ -58,7 +58,7 @@ impl<'a> Parser<'a> {
         symbols.retain(|sym| sym.contains("__ol_test_"));
         for symbol in symbols.iter_mut() {
             if symbol.starts_with("___ol_test_") {
-                *symbol = symbol.strip_prefix("_").unwrap().to_string();
+                *symbol = symbol.strip_prefix('_').unwrap().to_string();
             }
         }
         symbols
