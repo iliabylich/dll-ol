@@ -1,24 +1,24 @@
-class Type < Struct.new(:c, :rust_name, :top_c_type, :format_string, :sample1, :sample2)
+class Type < Struct.new(:c, :rs, :top_c_type, :format_string, :sample1, :sample2)
   def to_c_id
     c.gsub(' *', '_ptr').gsub(' ', '_')
   end
 end
 
 class SignedIntType < Type
-  def initialize(c, rust_name)
-    super(c, rust_name, 'int64_t', '%lld', '-1', '-2')
+  def initialize(c, rs)
+    super(c, rs, 'int64_t', '%lld', '-1', '-2')
   end
 end
 
 class UnsignedIntType < Type
-  def initialize(c, rust_name)
-    super(c, rust_name, 'uint64_t', '%llu', '1', '2')
+  def initialize(c, rs)
+    super(c, rs, 'uint64_t', '%llu', '1', '2')
   end
 end
 
 class FloatType < Type
-  def initialize(c, rust_name)
-    super(c, rust_name, 'long double', '%Lf', '42.0', '43.0')
+  def initialize(c, rs)
+    super(c, rs, 'long double', '%Lf', '42.0', '43.0')
   end
 end
 
@@ -60,8 +60,8 @@ FLOAT_TYPES = [
 ALL_TYPES = [
   *INTEGER_TYPES,
   *FLOAT_TYPES,
-  Type.new('char *', 'TODO', 'char *', '%s', '"hello"', '"world"'),
-  Type.new('void *', 'TODO', 'void *', '%p', 'NULL', '(void *)42'),
+  Type.new('char *', '*const std::ffi::c_char', 'char *', '%s', '"hello"', '"world"'),
+  Type.new('void *', '*const std::ffi::c_void', 'void *', '%p', 'NULL', '(void *)42'),
 ]
 
 # headers/assertions.gen.h
@@ -105,4 +105,30 @@ File.open('fixtures/assert_eq_all.gen.h', 'w') do |f|
     f.puts "assert_ne_#{type.to_c_id}(#{type.to_c_id}_, #{type.sample2});"
     f.puts
   end
+end
+
+# src/assertions/gen.rs
+File.open('src/assertions/gen.rs', 'w') do |f|
+  ALL_TYPES.each do |type|
+    f.puts '#[no_mangle]'
+    f.puts "pub extern \"C\" fn assert_eq_#{type.to_c_id}(_lhs: #{type.rs}, _rhs: #{type.rs}) {"
+    f.puts '    todo!()'
+    f.puts '}'
+    f.puts '#[no_mangle]'
+    f.puts "pub extern \"C\" fn assert_ne_#{type.to_c_id}(_lhs: #{type.rs}, _rhs: #{type.rs}) {"
+    f.puts '    todo!()'
+    f.puts '}'
+    f.puts
+  end
+
+  f.puts 'pub fn trigger_inclusion() -> usize {'
+  f.puts '    ['
+  ALL_TYPES.each do |type|
+    f.puts "        assert_eq_#{type.to_c_id} as *mut std::ffi::c_void as usize,"
+    f.puts "        assert_ne_#{type.to_c_id} as *mut std::ffi::c_void as usize,"
+  end
+  f.puts '    ]'
+  f.puts '    .into_iter()'
+  f.puts '    .fold(0, |acc, e| acc.wrapping_add(e))'
+  f.puts '}'
 end
