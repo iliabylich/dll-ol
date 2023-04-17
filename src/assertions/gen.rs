@@ -202,15 +202,6 @@ pub extern "C" fn assert_ne_double(_lhs: c_double, _rhs: c_double) {
 }
 
 #[no_mangle]
-pub extern "C" fn assert_eq_long_double(_lhs: f64, _rhs: f64) {
-    todo!()
-}
-#[no_mangle]
-pub extern "C" fn assert_ne_long_double(_lhs: f64, _rhs: f64) {
-    todo!()
-}
-
-#[no_mangle]
 pub extern "C" fn assert_eq_char_ptr(_lhs: *const c_char, _rhs: *const c_char) {
     todo!()
 }
@@ -274,8 +265,6 @@ pub fn trigger_inclusion() -> usize {
         assert_ne_float as *mut std::ffi::c_void as usize,
         assert_eq_double as *mut std::ffi::c_void as usize,
         assert_ne_double as *mut std::ffi::c_void as usize,
-        assert_eq_long_double as *mut std::ffi::c_void as usize,
-        assert_ne_long_double as *mut std::ffi::c_void as usize,
         assert_eq_char_ptr as *mut std::ffi::c_void as usize,
         assert_ne_char_ptr as *mut std::ffi::c_void as usize,
         assert_eq_void_ptr as *mut std::ffi::c_void as usize,

@@ -68,9 +68,6 @@ void assert_ne_float(float lhs, float rhs);
 void assert_eq_double(double lhs, double rhs);
 void assert_ne_double(double lhs, double rhs);
 
-void assert_eq_long_double(long double lhs, long double rhs);
-void assert_ne_long_double(long double lhs, long double rhs);
-
 void assert_eq_char_ptr(char * lhs, char * rhs);
 void assert_ne_char_ptr(char * lhs, char * rhs);
 

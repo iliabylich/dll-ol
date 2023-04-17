@@ -86,10 +86,6 @@ double double_ = 42.0;
 assert_eq_double(double_, double_);
 assert_ne_double(double_, 43.0);
 
-long double long_double_ = 42.0;
-assert_eq_long_double(long_double_, long_double_);
-assert_ne_long_double(long_double_, 43.0);
-
 char * char_ptr_ = "hello";
 assert_eq_char_ptr(char_ptr_, char_ptr_);
 assert_ne_char_ptr(char_ptr_, "world");

@@ -54,7 +54,6 @@ INTEGER_TYPES = [
 FLOAT_TYPES = [
   FloatType.new('float', 'c_float'),
   FloatType.new('double', 'c_double'),
-  FloatType.new('long double', 'f64'),
 ]
 
 ALL_TYPES = [
