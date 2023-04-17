@@ -60,7 +60,7 @@ FLOAT_TYPES = [
 ALL_TYPES = [
   *INTEGER_TYPES,
   *FLOAT_TYPES,
-  Type.new('char *', 'TODO', 'char *', '%s', '"hello"', "'world'"),
+  Type.new('char *', 'TODO', 'char *', '%s', '"hello"', '"world"'),
   Type.new('void *', 'TODO', 'void *', '%p', 'NULL', '(void *)42'),
 ]
 
@@ -99,19 +99,10 @@ end
 
 # fixtures/assert_eq_all.gen.h
 File.open('fixtures/assert_eq_all.gen.h', 'w') do |f|
-  INTEGER_TYPES.each do |type|
-    f.puts "#{type.c} #{type.to_c_id}_ = 42;"
+  ALL_TYPES.each do |type|
+    f.puts "#{type.c} #{type.to_c_id}_ = #{type.sample1};"
     f.puts "assert_eq_#{type.to_c_id}(#{type.to_c_id}_, #{type.to_c_id}_);"
-    f.puts "assert_ne_#{type.to_c_id}(#{type.to_c_id}_, 0);"
+    f.puts "assert_ne_#{type.to_c_id}(#{type.to_c_id}_, #{type.sample2});"
     f.puts
   end
-  FLOAT_TYPES.each do |type|
-    f.puts "#{type.c} #{type.to_c_id}_ = 42.0;"
-    f.puts "assert_eq_#{type.to_c_id}(#{type.to_c_id}_, #{type.to_c_id}_);"
-    f.puts "assert_ne_#{type.to_c_id}(#{type.to_c_id}_, 0.0);"
-    f.puts
-  end
-  f.puts "char *char_ptr_ = \"hello\";"
-  f.puts "assert_eq_char_ptr(char_ptr_, char_ptr_);"
-  f.puts "assert_ne_char_ptr(char_ptr_, \"world\");"
 end
