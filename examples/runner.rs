@@ -1,12 +1,12 @@
-use dll_ol::{trigger_assertions_inclusion, MultiFile, TestSuite};
+use dll_ol::{trigger_assertions_inclusion, TestSuite, Tests};
 
 pub fn main() {
     trigger_assertions_inclusion();
 
     let paths = std::env::args().into_iter().skip(1).collect::<Vec<_>>();
-    let file_group = MultiFile::new(&paths).unwrap();
+    let file_group = TestSuite::new(&paths).unwrap();
 
-    file_group.each_test(|test| {
+    for test in file_group.tests() {
         let name = test.name.clone();
 
         println!(
@@ -17,5 +17,5 @@ pub fn main() {
         (test.f)();
 
         println!("---- Test {} finished", name);
-    });
+    }
 }

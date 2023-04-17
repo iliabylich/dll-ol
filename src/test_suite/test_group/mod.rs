@@ -1,25 +1,21 @@
-use crate::{
-    loader::{Loader, TestFn},
-    parser::Parser,
-};
-use std::collections::HashMap;
+use crate::{loader::Loader, parser::Parser};
 
 mod error;
 pub(crate) use error::FileError;
 
-use crate::test_suite::{Test, TestSuite};
+use crate::test_suite::{Test, Tests};
 
 #[derive(Debug)]
-pub struct SingleFile {
+pub struct TestGroup {
     pub(crate) dlib_path: String,
 
-    pub(crate) tests: HashMap<String, TestFn>,
+    pub(crate) tests: Vec<Test>,
 
     #[allow(dead_code)]
     dl: Loader,
 }
 
-impl SingleFile {
+impl TestGroup {
     pub fn new(dlib_path: &str) -> Result<Self, FileError> {
         let content = std::fs::read(dlib_path)?;
         let symbols = Parser::new(&content)
@@ -27,10 +23,14 @@ impl SingleFile {
             .unwrap_or_default();
         let dl = Loader::new(dlib_path)?;
 
-        let mut tests = HashMap::new();
+        let mut tests = vec![];
         for symbol in symbols {
             let f = dl.get_symbol(&symbol)?;
-            tests.insert(symbol, f);
+            tests.push(Test {
+                dlib_path: dlib_path.to_string(),
+                name: symbol.clone(),
+                f,
+            });
         }
 
         Ok(Self {
@@ -41,18 +41,9 @@ impl SingleFile {
     }
 }
 
-impl TestSuite for SingleFile {
-    fn each_test<F>(&self, f: F)
-    where
-        F: Fn(Test),
-    {
-        for (name, test) in &self.tests {
-            f(Test {
-                dlib_path: self.dlib_path.clone(),
-                name: name.clone(),
-                f: *test,
-            });
-        }
+impl Tests for TestGroup {
+    fn tests(&self) -> Vec<Test> {
+        self.tests.clone()
     }
 }
 
@@ -60,13 +51,17 @@ impl TestSuite for SingleFile {
 fn test_new_ok() {
     crate::assertions::trigger_inclusion();
 
-    let runner = SingleFile::new(crate::fixtures::FOR_CURRENT_PLATFORM).unwrap();
+    let runner = TestGroup::new(crate::fixtures::FOR_CURRENT_PLATFORM).unwrap();
     assert_eq!(runner.tests.len(), 3);
 
-    let mut keys = runner.tests.keys().collect::<Vec<_>>();
-    keys.sort_unstable();
+    let mut test_names = runner
+        .tests
+        .iter()
+        .map(|test| test.name.to_string())
+        .collect::<Vec<_>>();
+    test_names.sort_unstable();
     assert_eq!(
-        keys,
+        test_names,
         vec!["__ol_test_crash", "__ol_test_fail", "__ol_test_pass"]
     );
 }
@@ -75,7 +70,7 @@ fn test_new_ok() {
 fn test_new_err() {
     crate::assertions::trigger_inclusion();
 
-    let runner = SingleFile::new("./unknown.dylib");
+    let runner = TestGroup::new("./unknown.dylib");
     assert!(runner.is_err());
     assert_eq!(runner.unwrap_err(), FileError::NoDylib);
 }

@@ -1,16 +1,11 @@
-pub struct Test {
-    pub dlib_path: String,
-    pub name: String,
-    pub f: extern "C" fn() -> (),
+mod test_group;
+
+mod test_suite;
+pub use test_suite::TestSuite;
+
+mod test;
+pub use test::Test;
+
+pub trait Tests {
+    fn tests(&self) -> Vec<Test>;
 }
-
-pub trait TestSuite {
-    fn each_test<F>(&self, f: F)
-    where
-        F: Fn(Test);
-}
-
-mod single_file;
-
-mod multi_file;
-pub use multi_file::MultiFile;
