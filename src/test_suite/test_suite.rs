@@ -1,4 +1,7 @@
-use crate::test_suite::{test_group::TestGroup, Test, Tests};
+use crate::{
+    reporter::Reporter,
+    test_suite::{test_group::TestGroup, Test, Tests},
+};
 
 pub struct TestSuite {
     pub(crate) files: Vec<TestGroup>,
@@ -12,6 +15,14 @@ impl TestSuite {
             files.push(file);
         }
         Self { files }
+    }
+
+    pub fn run(&self) {
+        Reporter::report_suite_started();
+        for file in &self.files {
+            file.run();
+        }
+        Reporter::report_suite_finished();
     }
 }
 

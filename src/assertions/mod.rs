@@ -1,5 +1,3 @@
-use crate::reporter::Reporter;
-
 mod gen;
 use gen::trigger_inclusion as gen_trigger_inclusion;
 
@@ -23,12 +21,7 @@ pub fn trigger_inclusion() -> usize {
 }
 
 pub(crate) trait Assertion {
-    fn run_with_reporter(&self, reporter: &mut Reporter);
-
-    fn run(&self) {
-        let mut reporter = Reporter::instance();
-        self.run_with_reporter(&mut reporter);
-    }
+    fn run(&self);
 }
 
 mod assert_eq;

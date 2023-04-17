@@ -12,11 +12,9 @@ impl<T> AssertNe<T> {
 }
 
 impl<T: PartialEq + std::fmt::Debug> Assertion for AssertNe<T> {
-    fn run_with_reporter(&self, reporter: &mut Reporter) {
-        if self.expected != self.actual {
-            reporter.report_success();
-        } else {
-            reporter.report_failure(format!(
+    fn run(&self) {
+        if self.expected == self.actual {
+            Reporter::report_test_failure(format!(
                 "Expected {:?} but got {:?}",
                 self.expected, self.actual
             ))

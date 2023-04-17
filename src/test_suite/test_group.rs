@@ -1,3 +1,5 @@
+use crate::reporter::Reporter;
+use crate::test_suite::test::TestState;
 use crate::{loader::Loader, parser::Parser};
 
 use crate::test_suite::{Test, Tests};
@@ -27,6 +29,7 @@ impl TestGroup {
                 dlib_path: dlib_path.to_string(),
                 name: symbol.clone(),
                 f,
+                state: TestState::Pending,
             });
         }
 
@@ -35,6 +38,14 @@ impl TestGroup {
             tests,
             dl,
         }
+    }
+
+    pub(crate) fn run(&self) {
+        Reporter::report_test_group_started(&self.dlib_path, self.tests.len());
+        for test in &self.tests {
+            test.run();
+        }
+        Reporter::report_test_group_finished();
     }
 }
 
