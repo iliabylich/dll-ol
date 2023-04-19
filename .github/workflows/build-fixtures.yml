@@ -9,40 +9,46 @@ jobs:
   build-elf:
     name: build ELF
     runs-on: ubuntu-latest
+    env:
+      SO_BUILD_LOCALLY: '1'
     steps:
       - name: checkout
         uses: actions/checkout@v3
 
       - name: build
-        run: gcc fixtures/tests.c -shared -o elf.so
+        run: make fixtures/elf.so
 
       - name: upload
         uses: actions/upload-artifact@v3
         with:
           name: elf.so
-          path: elf.so
+          path: fixtures/elf.so
           if-no-files-found: error
 
   build-mach-o-binary:
     name: build Mach-O (binary)
+    env:
+      MACH_O_BUILD_LOCALLY: '1'
     runs-on: macos-latest
     steps:
       - name: checkout
         uses: actions/checkout@v3
 
       - name: build
-        run: clang -Wl,-undefined,dynamic_lookup fixtures/tests.c -shared -o mach-o-binary.dylib
+        run: make fixtures/mach-o-binary.dylib
 
       - name: upload
         uses: actions/upload-artifact@v3
         with:
           name: mach-o-binary.dylib
-          path: mach-o-binary.dylib
+          path: fixtures/mach-o-binary.dylib
           if-no-files-found: error
 
   build-pe:
     name: build PE
     runs-on: windows-latest
+    env:
+      PE_BUILD_LOCALLY: '1'
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -51,17 +57,17 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: build
-        run: cl.exe /std:c11 /D_USRDLL /D_WINDLL fixtures/tests.c /MT /link /FORCE:UNRESOLVED /DLL /OUT:pe.dll
+        run: make fixtures/pe.dll
 
       - name: show compiled files
-        run: ls -l
+        run: ls -l fixtures/
         shell: bash
 
       - name: upload
         uses: actions/upload-artifact@v3
         with:
           name: pe.dll
-          path: pe.dll
+          path: fixtures/pe.dll
           if-no-files-found: error
 
   release:
