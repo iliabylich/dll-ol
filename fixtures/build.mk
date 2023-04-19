@@ -1,4 +1,4 @@
-FIXTURES_RELEASE = fixtures-v0.2
+FIXTURES_RELEASE = fixtures-v0.3
 BASE_FIXTURE_URL = https://github.com/iliabylich/dll-ol/releases/download/$(FIXTURES_RELEASE)
 
 MACH_O_DYLIB = fixtures/mach-o-binary.dylib
