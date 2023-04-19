@@ -13,6 +13,8 @@ jobs:
   test:
     name: test
     runs-on: ubuntu-latest
+    env:
+      SO_BUILD_LOCALLY: '1'
     steps:
       - name: checkout
         uses: actions/checkout@v3
