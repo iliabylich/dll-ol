@@ -1,3 +1,5 @@
+use backtrace::Backtrace;
+
 use crate::{context::Context, loader::Loader};
 
 mod state;
@@ -50,9 +52,9 @@ impl Test {
     }
 
     // Called by assertions in case of a failure
-    pub(crate) fn failed(&mut self, message: String) {
+    pub(crate) fn failed(&mut self, message: String, backtrace: Backtrace) {
         if self.state.set_failed() {
-            Context::reporter().test_failed(message);
+            Context::reporter().test_failed(message, backtrace);
         }
     }
 }

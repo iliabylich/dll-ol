@@ -1,9 +1,41 @@
+use backtrace::{Backtrace, BacktraceSymbol};
+
 use crate::{context::Context, test::TestName};
 
 struct Failure {
     dlib_path: String,
     test_name: TestName,
     message: String,
+    backtrace: Backtrace,
+}
+
+impl Failure {
+    fn user_backtrace(&self) -> Vec<BacktraceSymbol> {
+        self.backtrace
+            .frames()
+            .iter()
+            .flat_map(|f| f.symbols())
+            .filter(|sym| {
+                if let Some(filename) = sym.filename() {
+                    let ext = filename
+                        .extension()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or_default();
+                    if ext == "rs" {
+                        // Rust, ignore
+                        false
+                    } else {
+                        // Non-Rust file with debug symbols
+                        true
+                    }
+                } else {
+                    // Non-Rust file without debug symbols
+                    true
+                }
+            })
+            .cloned()
+            .collect::<Vec<_>>()
+    }
 }
 
 #[derive(Default)]
@@ -33,7 +65,11 @@ impl Reporter {
                     failure.test_name.pretty(),
                     failure.dlib_path
                 );
-                eprintln!("    {}\n", failure.message);
+                eprintln!("    {}", failure.message);
+                eprintln!("    Backtrace:");
+                for frame in failure.user_backtrace() {
+                    eprintln!("      {:?}", frame);
+                }
             }
         }
     }
@@ -61,7 +97,7 @@ impl Reporter {
         eprintln!("{}ok{}", GREEN, RESET_COLOR);
     }
 
-    pub(crate) fn test_failed(&mut self, message: String) {
+    pub(crate) fn test_failed(&mut self, message: String, backtrace: Backtrace) {
         let test = Context::current_test().unwrap();
         eprintln!("{}FAILED{}", RED, RESET_COLOR);
 
@@ -69,6 +105,7 @@ impl Reporter {
             dlib_path: test.dlib_path.clone(),
             test_name: test.name.clone(),
             message,
+            backtrace,
         })
     }
 }

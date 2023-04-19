@@ -6,13 +6,13 @@ ELF_SO = fixtures/elf.so
 PE_DLL = fixtures/pe.dll
 
 ifdef MACH_O_BUILD_LOCALLY
-GET_MACH_O = $(CC) -Wl,-undefined,dynamic_lookup -shared fixtures/tests.c -o $(MACH_O_DYLIB)
+GET_MACH_O = $(CC) -g -Wl,-undefined,dynamic_lookup -shared fixtures/tests.c -o $(MACH_O_DYLIB)
 else
 GET_MACH_O = wget -q $(BASE_FIXTURE_URL)/mach-o-binary.dylib -O $(MACH_O_DYLIB)
 endif
 
 ifdef SO_BUILD_LOCALLY
-GET_SO = $(CC) fixtures/tests.c -shared -o $(ELF_SO)
+GET_SO = $(CC) -g fixtures/tests.c -shared -o $(ELF_SO)
 else
 GET_SO = wget -q $(BASE_FIXTURE_URL)/elf.so -O $(ELF_SO)
 endif
