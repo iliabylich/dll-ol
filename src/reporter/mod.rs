@@ -1,42 +1,9 @@
-use backtrace::{Backtrace, BacktraceSymbol};
+use backtrace::Backtrace;
 
-use crate::{context::Context, test::TestName};
+use crate::context::Context;
 
-struct Failure {
-    dlib_path: String,
-    test_name: TestName,
-    message: String,
-    backtrace: Backtrace,
-}
-
-impl Failure {
-    fn user_backtrace(&self) -> Vec<BacktraceSymbol> {
-        self.backtrace
-            .frames()
-            .iter()
-            .flat_map(|f| f.symbols())
-            .filter(|sym| {
-                if let Some(filename) = sym.filename() {
-                    let ext = filename
-                        .extension()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or_default();
-                    if ext == "rs" {
-                        // Rust, ignore
-                        false
-                    } else {
-                        // Non-Rust file with debug symbols
-                        true
-                    }
-                } else {
-                    // Non-Rust file without debug symbols
-                    true
-                }
-            })
-            .cloned()
-            .collect::<Vec<_>>()
-    }
-}
+mod failure;
+use failure::Failure;
 
 #[derive(Default)]
 pub(crate) struct Reporter {
@@ -60,15 +27,14 @@ impl Reporter {
         } else {
             eprintln!("{} tests failed:\n", self.failures.len());
             for failure in &mut self.failures {
-                eprintln!(
-                    "  {} (in {})",
-                    failure.test_name.pretty(),
-                    failure.dlib_path
-                );
-                eprintln!("    {}", failure.message);
+                eprintln!("{} (in {})", failure.test_name.pretty(), failure.dlib_path);
+                eprintln!("{}\n", failure.message);
                 eprintln!("    Backtrace:");
-                for frame in failure.user_backtrace() {
-                    eprintln!("      {:?}", frame);
+                for (idx, frame) in failure.user_backtrace().iter().enumerate() {
+                    eprintln!("{:>4}: {}", idx, frame.symbol_name());
+                    if let Some(file_line_col) = frame.file_line_col() {
+                        eprintln!("             {}", file_line_col);
+                    }
                 }
             }
         }
