@@ -106,6 +106,8 @@ pub fn run_from_env() {
 
 #[test]
 fn test_everything() {
+    crate::assertions::trigger_inclusion();
+
     let path = crate::fixtures::FOR_CURRENT_PLATFORM.to_string();
     let ctx = Box::new(
         Context::new()
