@@ -1,5 +1,7 @@
 mod assertions;
 mod context;
+mod failure;
+mod formatter;
 mod loader;
 mod parser;
 mod reporter;

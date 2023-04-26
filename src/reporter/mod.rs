@@ -1,77 +1,69 @@
 use backtrace::Backtrace;
 
-use crate::context::Context;
+use crate::{
+    context::Context,
+    failure::Failure,
+    formatter::{Formatter, StdoutFormatter},
+};
 
-mod failure;
-use failure::Failure;
-
-#[derive(Default)]
 pub(crate) struct Reporter {
-    failures: Vec<Failure>,
+    formatter: Box<dyn Formatter>,
 }
 
-const GREEN: &str = "\x1b[1;32m";
-const RED: &str = "\x1b[0;31m";
-const RESET_COLOR: &str = "\x1b[0m";
-
 impl Reporter {
+    pub(crate) fn stdout() -> Self {
+        Self {
+            formatter: Box::new(StdoutFormatter),
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn in_memory() -> Self {
+        use crate::formatter::InMemoryFormatter;
+
+        Self {
+            formatter: Box::new(InMemoryFormatter),
+        }
+    }
+
     pub(crate) fn suite_started(&mut self) {
-        eprintln!("\nStarting...");
+        let test_suite = Context::current_test_suite();
+        self.formatter.suite_started(test_suite);
     }
 
     pub(crate) fn suite_finished(&mut self) {
-        eprintln!("\nFinished.\n");
-
-        if self.failures.is_empty() {
-            eprintln!("All tests passed");
-        } else {
-            eprintln!("{} tests failed:\n", self.failures.len());
-            for failure in &mut self.failures {
-                eprintln!("{} (in {})", failure.test_name.pretty(), failure.dlib_path);
-                eprintln!("{}\n", failure.message);
-                eprintln!("    Backtrace:");
-                for (idx, frame) in failure.user_backtrace().iter().enumerate() {
-                    eprintln!("{:>4}: {}", idx, frame.symbol_name());
-                    if let Some(file_line_col) = frame.file_line_col() {
-                        eprintln!("             {}", file_line_col);
-                    }
-                }
-            }
-        }
+        let test_suite = Context::current_test_suite();
+        self.formatter.suite_finished(test_suite);
     }
 
     pub(crate) fn test_group_started(&mut self) {
         let test_group = Context::current_test_group().unwrap();
-
-        eprintln!(
-            "\nRunning {} tests from {}",
-            test_group.tests_count(),
-            test_group.name()
-        );
+        self.formatter.group_started(test_group);
     }
 
-    pub(crate) fn test_group_finished(&mut self) {}
+    pub(crate) fn test_group_finished(&mut self) {
+        let test_group = Context::current_test_group().unwrap();
+        self.formatter.group_finished(test_group);
+    }
 
     pub(crate) fn test_started(&mut self) {
         let test = Context::current_test().unwrap();
-
-        eprint!("test {} ... ", test.name.pretty());
+        self.formatter.test_started(test);
     }
 
     pub(crate) fn test_passed(&mut self) {
-        let _test = Context::current_test().unwrap();
-        eprintln!("{}ok{}", GREEN, RESET_COLOR);
+        let test = Context::current_test().unwrap();
+        self.formatter.test_passed(test);
     }
 
     pub(crate) fn test_failed(&mut self, message: String, backtrace: Backtrace) {
         let test = Context::current_test().unwrap();
-        eprintln!("{}FAILED{}", RED, RESET_COLOR);
-
-        self.failures.push(Failure {
+        Context::failures().push(Failure {
             dlib_path: test.dlib_path.clone(),
             test_name: test.name.clone(),
-            message,
+            message: message.clone(),
             backtrace,
-        })
+        });
+        self.formatter.test_failed(test, message);
     }
 }
