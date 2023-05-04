@@ -1,6 +1,6 @@
 use backtrace::Backtrace;
 
-use crate::{context::Context, loader::Loader};
+use crate::{context::Context, loader::Loader, reporter::Reporter};
 
 mod state;
 use state::TestState;
@@ -42,19 +42,19 @@ impl Test {
         // SAFETY: the Test is boxed and it's never moved.
         Context::set_current_test(unsafe { test.as_mut().unwrap() });
 
-        Context::reporter().test_started();
+        Reporter::test_started();
     }
 
     fn passed(&mut self) {
         if self.state.set_passed() {
-            Context::reporter().test_passed();
+            Reporter::test_passed();
         }
     }
 
     // Called by assertions in case of a failure
     pub(crate) fn failed(&mut self, message: String, backtrace: Backtrace) {
         if self.state.set_failed() {
-            Context::reporter().test_failed(message, backtrace);
+            Reporter::test_failed(message, backtrace);
         }
     }
 }

@@ -1,5 +1,4 @@
-use crate::context::Context;
-use crate::{loader::Loader, parser::Parser};
+use crate::{context::Context, loader::Loader, parser::Parser, reporter::Reporter};
 
 use crate::test::Test;
 
@@ -54,11 +53,11 @@ impl TestGroup {
         // SAFETY: the Test is boxed and it's never moved.
         Context::set_current_test_group(unsafe { test_group.as_mut().unwrap() });
 
-        Context::reporter().test_group_started()
+        Reporter::test_group_started()
     }
 
     fn finished(&self) {
-        Context::reporter().test_group_finished()
+        Reporter::test_group_finished()
     }
 }
 

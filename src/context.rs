@@ -1,6 +1,5 @@
 use crate::{
     failure::Failure,
-    reporter::Reporter,
     test::Test,
     test_suite::{TestGroup, TestSuite},
 };
@@ -10,8 +9,6 @@ pub(crate) struct Context {
 
     current_test_group: Option<&'static mut TestGroup>,
     current_test: Option<&'static mut Test>,
-
-    reporter: Reporter,
 
     failures: Vec<Failure>,
 
@@ -27,7 +24,6 @@ impl Context {
             test_suite: TestSuite::from(vec![]),
             current_test_group: None,
             current_test: None,
-            reporter: Reporter::stdout(),
             failures: vec![],
             #[cfg(test)]
             log: vec![],
@@ -36,12 +32,6 @@ impl Context {
 
     fn with_paths(mut self, paths: Vec<String>) -> Self {
         self.test_suite = TestSuite::from(paths);
-        self
-    }
-
-    #[cfg(test)]
-    fn with_reporter(mut self, reporter: Reporter) -> Self {
-        self.reporter = reporter;
         self
     }
 
@@ -69,10 +59,6 @@ impl Context {
 
     pub(crate) fn set_current_test(test: &'static mut Test) {
         Self::current().current_test = Some(test)
-    }
-
-    pub(crate) fn reporter() -> &'static mut Reporter {
-        &mut Self::current().reporter
     }
 
     pub(crate) fn failures() -> &'static mut Vec<Failure> {
@@ -108,12 +94,10 @@ pub fn run_from_env() {
 fn test_everything() {
     crate::assertions::trigger_inclusion();
 
+    crate::formatter::Formatter::set_in_memory();
+
     let path = crate::fixtures::FOR_CURRENT_PLATFORM.to_string();
-    let ctx = Box::new(
-        Context::new()
-            .with_paths(vec![path])
-            .with_reporter(Reporter::in_memory()),
-    );
+    let ctx = Box::new(Context::new().with_paths(vec![path]));
     unsafe { CONTEXT_REF = Box::into_raw(ctx) }
     Context::current().test_suite.run();
     let logged = Context::logged();

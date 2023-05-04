@@ -1,4 +1,4 @@
-use crate::{context::Context, test_suite::test_group::TestGroup};
+use crate::{reporter::Reporter, test_suite::test_group::TestGroup};
 
 pub struct TestSuite {
     groups: Vec<Box<TestGroup>>,
@@ -25,10 +25,10 @@ impl TestSuite {
     }
 
     fn started(&self) {
-        Context::reporter().suite_started()
+        Reporter::suite_started()
     }
 
     fn finished(&self) {
-        Context::reporter().suite_finished()
+        Reporter::suite_finished()
     }
 }

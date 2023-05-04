@@ -1,3 +1,5 @@
+#![feature(local_key_cell_methods)]
+
 mod assertions;
 mod context;
 mod failure;

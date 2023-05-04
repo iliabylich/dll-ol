@@ -1,17 +1,23 @@
 use crate::{
     context::Context,
-    formatter::Formatter,
+    formatter::FormatterImpl,
     test::Test,
     test_suite::{TestGroup, TestSuite},
 };
 
 pub(crate) struct InMemoryFormatter;
 
+impl InMemoryFormatter {
+    pub(crate) fn new() -> Self {
+        Self
+    }
+}
+
 fn log(s: String) {
     Context::logged().push(s);
 }
 
-impl Formatter for InMemoryFormatter {
+impl FormatterImpl for InMemoryFormatter {
     fn suite_started(&self, _suite: &TestSuite) {
         log(format!("suite_started"))
     }

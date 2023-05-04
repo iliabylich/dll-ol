@@ -1,6 +1,6 @@
 use crate::{
     context::Context,
-    formatter::Formatter,
+    formatter::FormatterImpl,
     test::Test,
     test_suite::{TestGroup, TestSuite},
 };
@@ -11,7 +11,13 @@ const GREEN: &str = "\x1b[1;32m";
 const RED: &str = "\x1b[0;31m";
 const RESET_COLOR: &str = "\x1b[0m";
 
-impl Formatter for StdoutFormatter {
+impl StdoutFormatter {
+    pub(crate) fn new() -> Self {
+        Self
+    }
+}
+
+impl FormatterImpl for StdoutFormatter {
     fn suite_started(&self, _suite: &TestSuite) {
         println!("\nStarting...");
     }
