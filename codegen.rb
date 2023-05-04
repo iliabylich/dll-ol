@@ -96,14 +96,27 @@ File.open('runner/assertions.gen.h', 'w') do |f|
   end
 end
 
-# fixtures/assert_eq_all.gen.h
-File.open('fixtures/assert_eq_all.gen.h', 'w') do |f|
+# fixtures/tests.gen.c
+File.open('fixtures/tests.gen.c', 'w') do |f|
+  f.puts '#include "../headers/dll-ol.h"'
+  f.puts
+  f.puts 'DEFINE_TEST(pass) {'
   ALL_TYPES.each do |type|
-    f.puts "#{type.c} #{type.to_c_id}_ = #{type.sample1};"
-    f.puts "assert_eq_#{type.to_c_id}(#{type.to_c_id}_, #{type.to_c_id}_);"
-    f.puts "assert_ne_#{type.to_c_id}(#{type.to_c_id}_, #{type.sample2});"
+    f.puts "  #{type.c} #{type.to_c_id}_ = #{type.sample1};"
+    f.puts "  assert_eq_#{type.to_c_id}(#{type.to_c_id}_, #{type.to_c_id}_);"
+    f.puts "  assert_ne_#{type.to_c_id}(#{type.to_c_id}_, #{type.sample2});"
     f.puts
   end
+  f.puts '}'
+  f.puts
+  f.puts 'DEFINE_TEST(fail) {'
+  f.puts '  assert_eq_int(1, 2);'
+  f.puts '}'
+  f.puts
+  f.puts 'DEFINE_TEST(crash) {'
+  f.puts '  int *ptr = 0;'
+  f.puts '  *ptr = 42;'
+  f.puts '}'
 end
 
 # src/assertions/gen.rs
