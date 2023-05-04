@@ -4,6 +4,7 @@ mod assertions;
 mod context;
 mod failure;
 mod formatter;
+mod formatter_backtrace_symbol;
 mod loader;
 mod parser;
 mod test;
