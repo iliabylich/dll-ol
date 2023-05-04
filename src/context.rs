@@ -125,7 +125,7 @@ fn test_everything() {
             "test_started",
             "test_failed",
             "test_started",
-            "test_failed",
+            "test_passed",
             "group_finished",
             "suite_finished",
         ]

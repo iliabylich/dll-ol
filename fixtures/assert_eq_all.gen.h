@@ -72,7 +72,7 @@ assert_ne_uint64_t(uint64_t_, 2);
 
 bool bool_ = 1;
 assert_eq_bool(bool_, bool_);
-assert_ne_bool(bool_, 2);
+assert_ne_bool(bool_, 0);
 
 size_t size_t_ = 1;
 assert_eq_size_t(size_t_, size_t_);

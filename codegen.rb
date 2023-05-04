@@ -47,7 +47,7 @@ INTEGER_TYPES = [
   UnsignedIntType.new('uint32_t', 'i32'),
   SignedIntType.new('int64_t', 'u64'),
   UnsignedIntType.new('uint64_t', 'i64'),
-  UnsignedIntType.new('bool', 'bool'),
+  Type.new('bool', 'bool', 'uint64_t', '%llu', '1', '0'),
   UnsignedIntType.new('size_t', 'usize'),
 ]
 
