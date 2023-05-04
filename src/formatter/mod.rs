@@ -11,7 +11,7 @@ use stdout::StdoutFormatter;
 #[cfg(test)]
 mod in_memory;
 #[cfg(test)]
-use in_memory::InMemoryFormatter;
+pub(crate) use in_memory::InMemoryFormatter;
 
 trait FormatterImpl {
     fn suite_started(&self, suite: &TestSuite);

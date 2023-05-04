@@ -11,9 +11,6 @@ pub(crate) struct Context {
     current_test: Option<&'static mut Test>,
 
     failures: Vec<Failure>,
-
-    #[cfg(test)]
-    log: Vec<String>,
 }
 
 static mut CONTEXT_REF: *mut Context = std::ptr::null_mut();
@@ -25,8 +22,6 @@ impl Context {
             current_test_group: None,
             current_test: None,
             failures: vec![],
-            #[cfg(test)]
-            log: vec![],
         }
     }
 
@@ -64,11 +59,6 @@ impl Context {
     pub(crate) fn failures() -> &'static mut Vec<Failure> {
         &mut Self::current().failures
     }
-
-    #[cfg(test)]
-    pub(crate) fn logged() -> &'static mut Vec<String> {
-        &mut Self::current().log
-    }
 }
 
 pub fn run(paths: Vec<String>) {
@@ -100,7 +90,7 @@ fn test_everything() {
     let ctx = Box::new(Context::new().with_paths(vec![path]));
     unsafe { CONTEXT_REF = Box::into_raw(ctx) }
     Context::current().test_suite.run();
-    let logged = Context::logged();
+    let logged = crate::formatter::InMemoryFormatter::logged();
     assert_eq!(
         logged,
         &[

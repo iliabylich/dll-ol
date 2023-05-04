@@ -1,5 +1,6 @@
+use std::cell::RefCell;
+
 use crate::{
-    context::Context,
     formatter::FormatterImpl,
     test::Test,
     test_suite::{TestGroup, TestSuite},
@@ -7,14 +8,22 @@ use crate::{
 
 pub(crate) struct InMemoryFormatter;
 
+thread_local! {
+    static LOGGED: RefCell<Vec<String>> = RefCell::new(Vec::new());
+}
+
 impl InMemoryFormatter {
     pub(crate) fn new() -> Self {
         Self
     }
+
+    pub(crate) fn logged() -> Vec<String> {
+        LOGGED.with(|v| v.borrow().clone())
+    }
 }
 
 fn log(s: String) {
-    Context::logged().push(s);
+    LOGGED.with_borrow_mut(|log| log.push(s));
 }
 
 impl FormatterImpl for InMemoryFormatter {
