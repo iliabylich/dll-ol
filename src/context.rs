@@ -36,14 +36,6 @@ impl Context {
         unsafe { CONTEXT_REF.as_mut().unwrap() }
     }
 
-    pub(crate) fn current_test_suite() -> &'static mut TestSuite {
-        &mut Self::current().test_suite
-    }
-
-    pub(crate) fn current_test_group() -> Option<&'static mut TestGroup> {
-        Self::current().current_test_group.as_deref_mut()
-    }
-
     pub(crate) fn set_current_test_group(test_group: &'static mut TestGroup) {
         Self::current().current_test_group = Some(test_group)
     }

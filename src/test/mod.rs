@@ -1,6 +1,6 @@
 use backtrace::Backtrace;
 
-use crate::{context::Context, loader::Loader, reporter::Reporter};
+use crate::{context::Context, failure::Failure, formatter::Formatter, loader::Loader};
 
 mod state;
 use state::TestState;
@@ -42,19 +42,25 @@ impl Test {
         // SAFETY: the Test is boxed and it's never moved.
         Context::set_current_test(unsafe { test.as_mut().unwrap() });
 
-        Reporter::test_started();
+        Formatter::test_started(self);
     }
 
     fn passed(&mut self) {
         if self.state.set_passed() {
-            Reporter::test_passed();
+            Formatter::test_passed(self);
         }
     }
 
     // Called by assertions in case of a failure
     pub(crate) fn failed(&mut self, message: String, backtrace: Backtrace) {
         if self.state.set_failed() {
-            Reporter::test_failed(message, backtrace);
+            Context::failures().push(Failure {
+                dlib_path: self.dlib_path.clone(),
+                test_name: self.name.clone(),
+                message: message.clone(),
+                backtrace,
+            });
+            Formatter::test_failed(self, message);
         }
     }
 }

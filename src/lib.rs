@@ -6,7 +6,6 @@ mod failure;
 mod formatter;
 mod loader;
 mod parser;
-mod reporter;
 mod test;
 mod test_suite;
 
