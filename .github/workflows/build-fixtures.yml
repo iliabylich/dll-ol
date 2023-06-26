@@ -2,8 +2,7 @@ name: build-dlibs
 
 on:
   push:
-    tags:
-      - 'fixtures-*'
+    branches: [ master ]
 
 jobs:
   build-elf:
@@ -96,4 +95,5 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "elf.so,mach-o-binary.dylib,pe.dll"
+          tag: fixtures-latest
           token: ${{ secrets.GITHUB_TOKEN }}
