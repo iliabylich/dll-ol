@@ -64,7 +64,9 @@ pub fn run(paths: Vec<String>) {
     Context::current().test_suite.run();
 
     // Free the context.
-    unsafe { Box::from_raw(CONTEXT_REF) };
+    unsafe {
+        let _ = Box::from_raw(CONTEXT_REF);
+    }
 }
 
 pub fn run_from_env() {
@@ -96,5 +98,7 @@ fn test_everything() {
             "suite_finished",
         ]
     );
-    unsafe { Box::from_raw(CONTEXT_REF) };
+    unsafe {
+        let _ = Box::from_raw(CONTEXT_REF);
+    }
 }
