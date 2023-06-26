@@ -121,7 +121,7 @@ end
 
 # src/assertions/gen.rs
 File.open('src/assertions/gen.rs', 'w') do |f|
-  f.puts 'use crate::assertions::{AssertEq, AssertNe, Assertion};'
+  f.puts 'use crate::assertions::{AssertEq, AssertNe};'
   f.puts 'use std::ffi::{'
   f.puts '    c_char, c_double, c_float, c_int, c_long, c_longlong, c_short, c_uchar, c_uint, c_ulong,'
   f.puts '    c_ulonglong, c_ushort, c_void,'
@@ -130,11 +130,11 @@ File.open('src/assertions/gen.rs', 'w') do |f|
   ALL_TYPES.each do |type|
     f.puts '#[no_mangle]'
     f.puts "pub extern \"C\" fn assert_eq_#{type.to_c_id}(lhs: #{type.rs}, rhs: #{type.rs}) {"
-    f.puts "    AssertEq::new(lhs, rhs).run();"
+    f.puts "    AssertEq::run(lhs, rhs);"
     f.puts '}'
     f.puts '#[no_mangle]'
     f.puts "pub extern \"C\" fn assert_ne_#{type.to_c_id}(lhs: #{type.rs}, rhs: #{type.rs}) {"
-    f.puts "    AssertNe::new(lhs, rhs).run();"
+    f.puts "    AssertNe::run(lhs, rhs);"
     f.puts '}'
     f.puts
   end

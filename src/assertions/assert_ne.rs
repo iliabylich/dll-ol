@@ -1,23 +1,16 @@
 use backtrace::Backtrace;
 
-use crate::{assertions::Assertion, context::Context};
+use crate::context::Context;
 
 pub(crate) struct AssertNe<T> {
-    expected: T,
-    actual: T,
+    _marker: std::marker::PhantomData<T>,
 }
 
-impl<T> AssertNe<T> {
-    pub(crate) fn new(expected: T, actual: T) -> Self {
-        Self { expected, actual }
-    }
-}
-
-impl<T: PartialEq + std::fmt::Debug> Assertion for AssertNe<T> {
-    fn run(&self) {
-        if self.expected == self.actual {
+impl<T: PartialEq + std::fmt::Debug> AssertNe<T> {
+    pub(crate) fn run(lhs: T, rhs: T) {
+        if lhs == rhs {
             Context::current_test().unwrap().failed(
-                format!("Expected {:?} but got {:?}", self.expected, self.actual),
+                format!("Expected {:?} but got {:?}", lhs, rhs),
                 Backtrace::new(),
             )
         }

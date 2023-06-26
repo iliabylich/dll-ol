@@ -1,4 +1,5 @@
 #![feature(local_key_cell_methods)]
+#![feature(concat_idents)]
 
 mod assertions;
 mod context;

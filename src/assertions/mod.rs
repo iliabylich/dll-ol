@@ -20,10 +20,6 @@ pub(crate) fn trigger_inclusion() -> usize {
         + gen_trigger_inclusion()
 }
 
-pub(crate) trait Assertion {
-    fn run(&self);
-}
-
 mod assert_eq;
 pub(crate) use assert_eq::AssertEq;
 
