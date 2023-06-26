@@ -76,26 +76,6 @@ File.open('headers/assertions.gen.h', 'w') do |f|
   end
 end
 
-# runner/assertions.gen.h
-File.open('runner/assertions.gen.h', 'w') do |f|
-  f.puts '#include <stdbool.h>'
-  f.puts '#include <stddef.h>'
-  f.puts '#include <stdint.h>'
-  f.puts '#include <stdio.h>'
-  f.puts
-  ALL_TYPES.each do |type|
-    f.puts "void assert_eq_#{type.to_c_id}(#{type.c} lhs, #{type.c} rhs)".fix_ptrs
-    f.puts "{"
-    f.puts "    printf(\"assert_eq_#{type.to_c_id}(#{type.format_string}, #{type.format_string})\\n\", (#{type.top_c_type})lhs, (#{type.top_c_type})rhs);"
-    f.puts "}"
-    f.puts "void assert_ne_#{type.to_c_id}(#{type.c} lhs, #{type.c} rhs)".fix_ptrs
-    f.puts "{"
-    f.puts "    printf(\"assert_ne_#{type.to_c_id}(#{type.format_string}, #{type.format_string})\\n\", (#{type.top_c_type})lhs, (#{type.top_c_type})rhs);"
-    f.puts "}"
-    f.puts
-  end
-end
-
 # fixtures/tests.gen.c
 File.open('fixtures/tests.gen.c', 'w') do |f|
   f.puts '#include "../headers/dll-ol.h"'
