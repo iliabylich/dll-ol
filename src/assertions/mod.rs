@@ -2,12 +2,12 @@ mod gen;
 use gen::trigger_inclusion as gen_trigger_inclusion;
 
 #[no_mangle]
-pub extern "C" fn assert_true(_value: bool) {
-    todo!()
+pub extern "C" fn assert_true(value: bool) {
+    AssertEq::run(value, true);
 }
 #[no_mangle]
-pub extern "C" fn assert_false(_value: bool) {
-    todo!()
+pub extern "C" fn assert_false(value: bool) {
+    AssertEq::run(value, true);
 }
 
 pub(crate) fn trigger_inclusion() -> usize {
