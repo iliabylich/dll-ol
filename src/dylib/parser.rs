@@ -5,17 +5,18 @@ use goblin::{
     Object,
 };
 
-pub(crate) struct Parser<'a> {
-    data: &'a [u8],
+pub(crate) struct Parser {
+    data: Vec<u8>,
 }
 
-impl<'a> Parser<'a> {
-    pub(crate) fn new(data: &'a [u8]) -> Self {
+impl Parser {
+    pub(crate) fn new(dlib_path: &str) -> Self {
+        let data = std::fs::read(&dlib_path).unwrap();
         Self { data }
     }
 
     fn parse_all(&self) -> Vec<String> {
-        match Object::parse(self.data).unwrap() {
+        match Object::parse(&self.data).unwrap() {
             Object::Elf(elf) => Self::parse_elf(elf),
             Object::PE(pe) => Self::parse_pe(pe),
             Object::Mach(Mach::Binary(mach)) => Self::parse_mach_o_binary(mach),
@@ -53,7 +54,7 @@ impl<'a> Parser<'a> {
         todo!("parse_mach_fat: {:#?}", mach)
     }
 
-    pub(crate) fn parse_test_symbols(&self) -> Vec<String> {
+    pub(crate) fn parse_test_symbols(self) -> Vec<String> {
         let mut symbols = self.parse_all();
         symbols.retain(|sym| sym.contains("__ol_test_"));
         for symbol in symbols.iter_mut() {
@@ -67,8 +68,7 @@ impl<'a> Parser<'a> {
 
 #[cfg(test)]
 fn parse_fixture(path: &str) -> Vec<String> {
-    let data = std::fs::read(path).unwrap();
-    let mut symbols = Parser::new(&data).parse_test_symbols();
+    let mut symbols = Parser::new(path).parse_test_symbols();
     symbols.sort_unstable();
     symbols
 }

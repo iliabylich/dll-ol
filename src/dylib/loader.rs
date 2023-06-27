@@ -12,7 +12,6 @@ macro_rules! panic_with_dlerror {
 
 #[derive(Debug)]
 pub(crate) struct Loader {
-    pub(crate) path: String,
     handle: *mut c_void,
 }
 
@@ -26,10 +25,7 @@ impl Loader {
         if handle.is_null() {
             panic_with_dlerror!();
         }
-        Self {
-            handle,
-            path: path.to_string(),
-        }
+        Self { handle }
     }
 
     pub(crate) fn get_symbol(&self, symbol: &str) -> TestFn {
