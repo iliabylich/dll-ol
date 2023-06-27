@@ -62,6 +62,7 @@ impl Parser {
                 *symbol = symbol.strip_prefix('_').unwrap().to_string();
             }
         }
+        symbols.sort_unstable();
         symbols
     }
 }
