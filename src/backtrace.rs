@@ -58,9 +58,9 @@ impl BacktraceSymbol {
     }
 
     pub(crate) fn file_line_col(&self) -> Option<String> {
-        let file = self.0.filename().map(|s| s.to_string_lossy().to_string())?;
-        let line = self.0.lineno().map(|l| l.to_string())?;
-        let col = self.0.colno().map(|c| c.to_string())?;
+        let file = self.0.filename()?.to_string_lossy().to_string();
+        let line = self.0.lineno()?.to_string();
+        let col = self.0.colno()?.to_string();
         Some(format!("at {}:{}:{}", file, line, col))
     }
 }
